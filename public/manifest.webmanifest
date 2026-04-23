@@ -1,0 +1,16 @@
+{
+  "name": "课程日历 PWA",
+  "short_name": "课程日历",
+  "description": "可导入 ICS 的课表日历网页应用",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
