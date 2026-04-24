@@ -108,8 +108,10 @@ function App() {
     for (const sem of semesters) {
       const start = dayjs(sem.startDate)
       const end = dayjs(sem.endDate)
-      if (now.isAfter(start.subtract(1, 'day') && now.isBefore(end.add(1, 'day')) {
-        return sem
+      if (now.isAfter(start.subtract(1, 'day')) {
+        if (now.isBefore(end.add(1, 'day')) {
+          return sem
+        }
       }
     }
     return null
