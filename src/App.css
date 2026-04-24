@@ -4,6 +4,9 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
+  --font-base: 17px;
+  --font-title: clamp(1.25rem, 1.08rem + 0.7vw, 1.52rem);
+  --control-height: 42px;
   --ease-ios: cubic-bezier(0.2, 0.9, 0.24, 1);
   --ease-ios-quick: cubic-bezier(0.3, 0.8, 0.35, 1);
   --radius-lg: 20px;
@@ -50,6 +53,8 @@
 body {
   margin: 0;
   min-height: 100vh;
+  font-size: var(--font-base);
+  line-height: 1.45;
   color: var(--text);
   background:
     radial-gradient(900px 420px at -6% -12%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 58%),
@@ -82,7 +87,7 @@ body {
 }
 
 .topbar h1 {
-  font-size: clamp(1.08rem, 1rem + 0.6vw, 1.42rem);
+  font-size: var(--font-title);
   margin: 0;
   letter-spacing: 0.2px;
 }
@@ -105,11 +110,12 @@ body {
 .theme-toggle {
   border: 1px solid var(--surface-border);
   border-radius: 999px;
-  padding: 7px 12px;
+  min-height: var(--control-height);
+  padding: 10px 14px;
   background: var(--surface-2);
   color: var(--text);
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: 0.93rem;
+  font-weight: 650;
 }
 
 .topbar-stats {
@@ -149,10 +155,12 @@ body {
 .tab-btn {
   border: none;
   border-radius: var(--radius-sm);
-  padding: 10px 8px;
+  min-height: var(--control-height);
+  padding: 11px 10px;
   background: transparent;
   color: var(--text-secondary);
-  font-weight: 600;
+  font-weight: 650;
+  font-size: 0.96rem;
   transition: background-color 240ms var(--ease-ios), color 240ms var(--ease-ios), transform 220ms var(--ease-ios-quick);
 }
 
@@ -176,7 +184,7 @@ body {
   margin-bottom: 10px;
   display: grid;
   grid-template-columns: minmax(220px, 1fr) minmax(180px, auto) auto 1fr;
-  gap: 10px;
+  gap: 12px;
   align-items: end;
 }
 
@@ -191,18 +199,22 @@ body {
 .filter-bar input {
   border: 1px solid var(--surface-border);
   border-radius: 10px;
-  padding: 8px 10px;
+  min-height: var(--control-height);
+  padding: 10px 12px;
   background: color-mix(in oklab, var(--surface) 70%, var(--bg-solid));
   color: var(--text);
+  font-size: 0.98rem;
 }
 
 .filter-bar button {
   border: 1px solid var(--surface-border);
   border-radius: 10px;
-  padding: 8px 10px;
+  min-height: var(--control-height);
+  padding: 10px 14px;
   background: var(--surface-2);
   color: var(--text-secondary);
-  font-weight: 600;
+  font-weight: 650;
+  font-size: 0.95rem;
 }
 
 .filter-bar small {
@@ -211,7 +223,15 @@ body {
 }
 
 .view-stage {
-  animation: ios-content-in 320ms var(--ease-ios);
+  animation: ios-content-in 340ms var(--ease-ios);
+}
+
+.content[data-transition-direction='forward'] .view-stage {
+  animation-name: ios-slide-left;
+}
+
+.content[data-transition-direction='backward'] .view-stage {
+  animation-name: ios-slide-right;
 }
 
 .panel {
@@ -431,7 +451,10 @@ button.danger {
   background: var(--surface-2);
   color: var(--text-secondary);
   border-radius: 9px;
-  padding: 6px 10px;
+  min-height: var(--control-height);
+  padding: 9px 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .month-grid {
@@ -636,6 +659,28 @@ button.danger {
   }
 }
 
+@keyframes ios-slide-left {
+  from {
+    opacity: 0;
+    transform: translate3d(22px, 0, 0) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes ios-slide-right {
+  from {
+    opacity: 0;
+    transform: translate3d(-22px, 0, 0) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
 @keyframes ios-pop-in {
   from {
     opacity: 0;
@@ -661,31 +706,70 @@ button.danger {
     padding: 10px 10px 84px;
   }
 
+  .topbar {
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  .topbar h1 {
+    font-size: 1.24rem;
+  }
+
+  .topbar p {
+    font-size: 0.98rem;
+  }
+
+  .tab-nav {
+    gap: 5px;
+    padding: 6px;
+  }
+
+  .tab-btn {
+    font-size: 0.92rem;
+    min-height: 44px;
+    padding: 8px 6px;
+  }
+
   .filter-bar {
     grid-template-columns: 1fr;
     align-items: stretch;
+    gap: 9px;
+  }
+
+  .filter-bar input,
+  .filter-bar button,
+  .theme-toggle,
+  .schedule-actions button,
+  .calendar-actions button,
+  .edit-inline-btn {
+    min-height: 44px;
   }
 
   .filter-bar small {
     justify-self: start;
+    font-size: 0.9rem;
   }
 
-  .tab-btn {
-    font-size: 0.8rem;
-    padding: 8px 4px;
+  .week-grid {
+    grid-template-columns: repeat(7, minmax(142px, 1fr));
+  }
+
+  .card {
+    padding: 12px;
   }
 
   .card header {
     flex-direction: column;
+    gap: 4px;
   }
 
   .day-cell {
-    min-height: 54px;
-    padding: 5px;
+    min-height: 56px;
+    padding: 6px;
   }
 
   .day-cell small {
-    font-size: 0.7rem;
+    font-size: 0.76rem;
   }
 
   .undo-toast {
@@ -693,5 +777,48 @@ button.danger {
     justify-content: space-between;
     border-radius: 14px;
     bottom: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  :root {
+    --font-base: 16px;
+  }
+
+  .app-shell {
+    padding: 8px 8px 82px;
+  }
+
+  .topbar-controls {
+    align-items: stretch;
+  }
+
+  .topbar-stats {
+    width: 100%;
+  }
+
+  .topbar-stats span {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .schedule-actions,
+  .calendar-actions {
+    width: 100%;
+  }
+
+  .schedule-actions button,
+  .calendar-actions button {
+    flex: 1;
+  }
+
+  .date-jump {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .date-jump input {
+    width: 100%;
+    min-width: 0;
   }
 }

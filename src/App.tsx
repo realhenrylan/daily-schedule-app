@@ -19,6 +19,10 @@ type PendingDelete = {
   event: CourseEvent
 }
 
+type TransitionDirection = 'forward' | 'backward'
+
+const TAB_ORDER: AppTab[] = ['home', 'schedule', 'calendar', 'import', 'settings']
+
 function App() {
   const [activeTab, setActiveTab] = useState<AppTab>('home')
   const [events, setEvents] = useState<CourseEvent[]>([])
@@ -28,6 +32,7 @@ function App() {
   const [searchText, setSearchText] = useState('')
   const [filterDate, setFilterDate] = useState('')
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null)
+  const [transitionDirection, setTransitionDirection] = useState<TransitionDirection>('forward')
   const deleteTimerRef = useRef<number | null>(null)
   const eventsRef = useRef<CourseEvent[]>([])
   const [theme, setTheme] = useState<ThemeMode>(() => {
@@ -37,6 +42,7 @@ function App() {
     }
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   })
+  const previousTabRef = useRef<AppTab>(activeTab)
 
   useEffect(() => {
     async function load() {
@@ -53,6 +59,14 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('schedule-theme', theme)
   }, [theme])
+
+  useEffect(() => {
+    const prev = previousTabRef.current
+    const prevIndex = TAB_ORDER.indexOf(prev)
+    const nextIndex = TAB_ORDER.indexOf(activeTab)
+    setTransitionDirection(nextIndex >= prevIndex ? 'forward' : 'backward')
+    previousTabRef.current = activeTab
+  }, [activeTab])
 
   useEffect(() => {
     return () => {
@@ -198,7 +212,7 @@ function App() {
 
       <TabNav activeTab={activeTab} onChange={setActiveTab} />
 
-      <main className="content">
+      <main className="content" data-transition-direction={transitionDirection}>
         <section className="panel filter-bar view-stage" aria-label="搜索与筛选">
           <label>
             搜索课程
