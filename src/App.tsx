@@ -5,6 +5,7 @@ import { CalendarView } from './components/CalendarView'
 import { EventEditorModal } from './components/EventEditorModal'
 import { HomeView } from './components/HomeView'
 import { ImportView } from './components/ImportView'
+import { OpsView } from './components/OpsView'
 import { ScheduleView } from './components/ScheduleView'
 import { SettingsView } from './components/SettingsView'
 import { TabNav } from './components/TabNav'
@@ -22,7 +23,7 @@ type PendingDelete = {
 
 type TransitionDirection = 'forward' | 'backward'
 
-const TAB_ORDER: AppTab[] = ['home', 'schedule', 'calendar', 'import', 'settings']
+const TAB_ORDER: AppTab[] = ['home', 'schedule', 'calendar', 'import', 'settings', 'ops']
 
 function App() {
   const [activeTab, setActiveTab] = useState<AppTab>('home')
@@ -38,6 +39,32 @@ function App() {
   const [pushStatusText, setPushStatusText] = useState('推送未开启')
   const [pushLogs, setPushLogs] = useState<PushDispatchLog[]>([])
   const [pushLogsLoading, setPushLogsLoading] = useState(false)
+  const showOps = useMemo(() => {
+    if (typeof window === 'undefined') return false
+    const fromQuery = new URLSearchParams(window.location.search).get('ops') === '1'
+    const fromStorage = localStorage.getItem('schedule-show-ops') === '1'
+    return fromQuery || fromStorage
+  }, [])
+  const navTabs = useMemo(
+    () =>
+      showOps
+        ? [
+            { id: 'home' as AppTab, label: '首页' },
+            { id: 'schedule' as AppTab, label: '课表' },
+            { id: 'calendar' as AppTab, label: '日历' },
+            { id: 'import' as AppTab, label: '导入' },
+            { id: 'settings' as AppTab, label: '设置' },
+            { id: 'ops' as AppTab, label: '运维' },
+          ]
+        : [
+            { id: 'home' as AppTab, label: '首页' },
+            { id: 'schedule' as AppTab, label: '课表' },
+            { id: 'calendar' as AppTab, label: '日历' },
+            { id: 'import' as AppTab, label: '导入' },
+            { id: 'settings' as AppTab, label: '设置' },
+          ],
+    [showOps],
+  )
   const deleteTimerRef = useRef<number | null>(null)
   const eventsRef = useRef<CourseEvent[]>([])
   const [theme, setTheme] = useState<ThemeMode>(() => {
@@ -108,8 +135,11 @@ function App() {
   }
 
   function handleTabChange(tab: AppTab) {
+    if (tab === 'ops' && !showOps) {
+      return
+    }
     setActiveTab(tab)
-    if (tab === 'settings') {
+    if (tab === 'settings' || tab === 'ops') {
       void handleRefreshPushLogs()
     }
   }
@@ -304,7 +334,7 @@ function App() {
         </div>
       </header>
 
-      <TabNav activeTab={activeTab} onChange={handleTabChange} />
+      <TabNav activeTab={activeTab} onChange={handleTabChange} tabs={navTabs} />
 
       <main className="content" data-transition-direction={transitionDirection}>
         <section className="panel filter-bar view-stage" aria-label="搜索与筛选">
@@ -341,17 +371,19 @@ function App() {
               records={records}
               pushEnabled={pushEnabled}
               pushStatusText={pushStatusText}
-              pushLogs={pushLogs}
-              pushLogsLoading={pushLogsLoading}
               onEnablePush={handleEnablePush}
               onDisablePush={handleDisablePush}
               onSyncPush={handleSyncPush}
               onTestPush={handleTestPush}
-              onRefreshPushLogs={handleRefreshPushLogs}
               onClearAll={handleClearAll}
               onExportBackup={handleExportBackup}
               onImportBackup={handleImportBackup}
             />
+          </div>
+        ) : null}
+        {!isLoading && activeTab === 'ops' && showOps ? (
+          <div className="view-stage">
+            <OpsView logs={pushLogs} loading={pushLogsLoading} onRefresh={handleRefreshPushLogs} />
           </div>
         ) : null}
       </main>

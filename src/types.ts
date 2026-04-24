@@ -1,4 +1,4 @@
-export type AppTab = 'home' | 'schedule' | 'calendar' | 'import' | 'settings'
+export type AppTab = 'home' | 'schedule' | 'calendar' | 'import' | 'settings' | 'ops'
 
 export type WeekdayCode = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU'
 
