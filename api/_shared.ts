@@ -1,5 +1,5 @@
-import * as webpush from 'web-push'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import type webpushType from 'web-push'
 
 const publicKey = process.env.VAPID_PUBLIC_KEY
 const privateKey = process.env.VAPID_PRIVATE_KEY
@@ -7,8 +7,28 @@ const subject = process.env.VAPID_SUBJECT || 'mailto:admin@example.com'
 
 let vapidReady = false
 let vapidInitError: string | null = null
+let webpushModule: typeof webpushType | null = null
 
-function initVapid(): boolean {
+async function getWebPushModule(): Promise<typeof webpushType> {
+  if (webpushModule) {
+    return webpushModule
+  }
+
+  const loaded = (await import('web-push')) as unknown as {
+    default?: typeof webpushType
+  } & typeof webpushType
+
+  const candidate = (loaded.default || loaded) as typeof webpushType
+
+  if (typeof candidate.setVapidDetails !== 'function' || typeof candidate.sendNotification !== 'function') {
+    throw new Error('web-push module shape is invalid')
+  }
+
+  webpushModule = candidate
+  return webpushModule
+}
+
+async function initVapid(): Promise<boolean> {
   if (vapidReady) {
     return true
   }
@@ -19,6 +39,7 @@ function initVapid(): boolean {
   }
 
   try {
+    const webpush = await getWebPushModule()
     webpush.setVapidDetails(subject, publicKey, privateKey)
     vapidReady = true
     vapidInitError = null
@@ -29,8 +50,8 @@ function initVapid(): boolean {
   }
 }
 
-export function ensureVapidConfigured(res: VercelResponse): boolean {
-  if (!initVapid()) {
+export async function ensureVapidConfigured(res: VercelResponse): Promise<boolean> {
+  if (!(await initVapid())) {
     res.status(500).json({ error: `Invalid VAPID configuration: ${vapidInitError}` })
     return false
   }
@@ -48,7 +69,8 @@ export function readJson<T>(req: VercelRequest): T {
   return req.body as T
 }
 
-export async function pushMessage(subscription: webpush.PushSubscription, payload: unknown) {
+export async function pushMessage(subscription: webpushType.PushSubscription, payload: unknown) {
+  const webpush = await getWebPushModule()
   await webpush.sendNotification(subscription, JSON.stringify(payload), {
     TTL: 60,
     urgency: 'high',

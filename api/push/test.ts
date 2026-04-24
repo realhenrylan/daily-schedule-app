@@ -11,7 +11,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return
   }
 
-  if (!ensureVapidConfigured(res)) {
+  if (!(await ensureVapidConfigured(res))) {
     return
   }
 
