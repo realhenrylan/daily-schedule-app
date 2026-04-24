@@ -426,6 +426,35 @@ body {
   text-align: center;
 }
 
+.schedule-quick-nav {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.schedule-quick-nav button {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 200ms var(--ease);
+}
+
+.schedule-quick-nav button:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+.schedule-quick-nav button.today-btn {
+  background: var(--accent-light);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 .week-grid {
   margin-top: 14px;
   display: grid;

@@ -15,6 +15,28 @@ export function ScheduleView({ events, onEditEvent }: ScheduleViewProps) {
   const today = dayjs()
   const todayKey = today.format('YYYY-MM-DD')
 
+  const weekTsList = useMemo(() => {
+    const unique = new Set(events.map((event) => startOfWeek(dayjs(event.start)).startOf('day').valueOf()))
+    return [...unique].sort((a, b) => a - b)
+  }, [events])
+
+  const currentWeekTs = weekCursor.startOf('day').valueOf()
+  const hasEventsThisWeek = weekTsList.includes(currentWeekTs)
+
+  const prevEventWeekTs = useMemo(() => {
+    for (let i = weekTsList.length - 1; i >= 0; i -= 1) {
+      if (weekTsList[i] < currentWeekTs) return weekTsList[i]
+    }
+    return null
+  }, [weekTsList, currentWeekTs])
+
+  const nextEventWeekTs = useMemo(() => {
+    for (let i = 0; i < weekTsList.length; i += 1) {
+      if (weekTsList[i] > currentWeekTs) return weekTsList[i]
+    }
+    return null
+  }, [weekTsList, currentWeekTs])
+
   const weekLabel = useMemo(() => {
     const start = days[0]
     const end = days[6]
@@ -24,6 +46,34 @@ export function ScheduleView({ events, onEditEvent }: ScheduleViewProps) {
     return `${start.month() + 1}/${start.date()} - ${end.month() + 1}/${end.date()}`
   }, [days])
 
+  function goToPrevWeek() {
+    setWeekCursor((prev) => prev.subtract(7, 'day'))
+  }
+
+  function goToNextWeek() {
+    setWeekCursor((prev) => prev.add(7, 'day'))
+  }
+
+  function goToPrevEventWeek() {
+    if (prevEventWeekTs !== null) {
+      setWeekCursor(dayjs(prevEventWeekTs))
+    } else if (weekTsList.length > 0) {
+      setWeekCursor(dayjs(weekTsList[weekTsList.length - 1]))
+    }
+  }
+
+  function goToNextEventWeek() {
+    if (nextEventWeekTs !== null) {
+      setWeekCursor(dayjs(nextEventWeekTs))
+    } else if (weekTsList.length > 0) {
+      setWeekCursor(dayjs(weekTsList[0]))
+    }
+  }
+
+  function goToThisWeek() {
+    setWeekCursor(startOfWeek(today))
+  }
+
   return (
     <section className="panel">
       <header className="schedule-header">
@@ -31,32 +81,32 @@ export function ScheduleView({ events, onEditEvent }: ScheduleViewProps) {
       </header>
 
       <div className="schedule-week-nav">
-        <button type="button" onClick={() => setWeekCursor((prev) => prev.subtract(7, 'day'))}>
+        <button type="button" onClick={goToPrevWeek}>
           ‹
         </button>
         <span>{weekLabel}</span>
-        <button type="button" onClick={() => setWeekCursor((prev) => prev.add(7, 'day'))}>
+        <button type="button" onClick={goToNextWeek}>
           ›
         </button>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
-        <button
-          type="button"
-          onClick={() => setWeekCursor(startOfWeek(today))}
-          style={{
-            border: 'none',
-            background: 'var(--accent-light)',
-            color: 'var(--accent)',
-            borderRadius: '8px',
-            padding: '6px 14px',
-            fontSize: '13px',
-            fontWeight: 500,
-          }}
-        >
-          回到本周
+      <div className="schedule-quick-nav">
+        <button type="button" onClick={goToPrevEventWeek}>
+          上一有课周
+        </button>
+        <button type="button" onClick={goToThisWeek} className="today-btn">
+          本周
+        </button>
+        <button type="button" onClick={goToNextEventWeek}>
+          下一有课周
         </button>
       </div>
+
+      {!hasEventsThisWeek && weekTsList.length > 0 && (
+        <p className="muted" style={{ textAlign: 'center', marginTop: '8px' }}>
+          当前周没有课程
+        </p>
+      )}
 
       <div className="week-grid">
         {days.map((day) => {
