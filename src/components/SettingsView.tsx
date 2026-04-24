@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { ImportRecord } from '../types'
 
 interface SettingsViewProps {
@@ -15,7 +16,7 @@ interface SettingsViewProps {
   onImportBackup: (file: File) => Promise<void>
 }
 
-const REMINDER_OPTIONS = [
+const PRESET_OPTIONS = [
   { value: 5, label: '5 分钟' },
   { value: 10, label: '10 分钟' },
   { value: 15, label: '15 分钟' },
@@ -25,6 +26,28 @@ const REMINDER_OPTIONS = [
 
 export function SettingsView(props: SettingsViewProps) {
   const { records, pushEnabled, pushStatusText, reminderMinutes, onReminderMinutesChange, onEnablePush, onDisablePush, onSyncPush, onTestPush, onClearAll, onExportBackup, onImportBackup } = props
+
+  const [customMinutes, setCustomMinutes] = useState('')
+  const isPreset = PRESET_OPTIONS.some(opt => opt.value === reminderMinutes)
+  const isCustom = !isPreset && reminderMinutes > 0
+
+  const handleCustomChange = (value: string) => {
+    setCustomMinutes(value)
+    const num = Number.parseInt(value, 10)
+    if (value === '') {
+      return
+    }
+    if (Number.isFinite(num) && num > 0 && num <= 1440) {
+      onReminderMinutesChange(num)
+    }
+  }
+
+  const handleCustomBlur = () => {
+    const num = Number.parseInt(customMinutes, 10)
+    if (!Number.isFinite(num) || num <= 0 || num > 1440) {
+      setCustomMinutes('')
+    }
+  }
 
   return (
     <div>
@@ -36,7 +59,7 @@ export function SettingsView(props: SettingsViewProps) {
           <div className="reminder-setting">
             <span className="reminder-label">提前提醒时间</span>
             <div className="reminder-options">
-              {REMINDER_OPTIONS.map((option) => {
+              {PRESET_OPTIONS.map((option) => {
                 const isActive = reminderMinutes === option.value
                 const className = isActive ? 'reminder-option active' : 'reminder-option'
                 return (
@@ -44,12 +67,31 @@ export function SettingsView(props: SettingsViewProps) {
                     key={option.value}
                     type="button"
                     className={className}
-                    onClick={() => onReminderMinutesChange(option.value)}
+                    onClick={() => {
+                      onReminderMinutesChange(option.value)
+                      setCustomMinutes('')
+                    }}
                   >
                     {option.label}
                   </button>
                 )
               })}
+            </div>
+            <div className="reminder-custom">
+              <span className="reminder-custom-label">自定义</span>
+              <div className="reminder-custom-input">
+                <input
+                  type="number"
+                  min="1"
+                  max="1440"
+                  value={isCustom ? reminderMinutes : customMinutes}
+                  onChange={(e) => handleCustomChange(e.target.value)}
+                  onBlur={handleCustomBlur}
+                  placeholder="输入分钟"
+                  className={isCustom ? 'active' : ''}
+                />
+                <span className="reminder-custom-suffix">分钟（最多24小时）</span>
+              </div>
             </div>
           </div>
           <div className="push-buttons">
