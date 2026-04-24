@@ -257,24 +257,27 @@ function App() {
     let semesterEnd: string | undefined
     if (semesterName) {
       const allCourseDates = [...events, ...deduped]
-        .filter(e => extractSemesterFromFileName(sourceName) === semesterName)
-        .map(e => dayjs(e.start))
-        .filter(d => d.isValid())
+        .filter((evt) => extractSemesterFromFileName(sourceName) === semesterName)
+        .map((evt) => dayjs(evt.start))
+        .filter((d) => d.isValid())
 
       if (allCourseDates.length > 0) {
         semesterStart = allCourseDates.reduce((min, d) => d.isBefore(min) ? d : min).startOf('day').toISOString()
         semesterEnd = allCourseDates.reduce((max, d) => d.isAfter(max) ? d : max).endOf('day').toISOString()
       } else {
-        const newDates = deduped.map(e => dayjs(e.start)).filter(d => d.isValid())
+        const newDates = deduped.map((evt) => dayjs(evt.start)).filter((d) => d.isValid())
         if (newDates.length > 0) {
           semesterStart = newDates.reduce((min, d) => d.isBefore(min) ? d : min).startOf('day').toISOString()
           semesterEnd = newDates.reduce((max, d) => d.isAfter(max) ? d : max).endOf('day').add(4, 'month').toISOString()
         }
       }
 
-      const existingSemester = semesters.find(s => s.name === semesterName)
-      if (!existingSemester && semesterName && semesterStart && semesterEnd) {
-        setSemesters(prev => [...prev, { name: semesterName, startDate: semesterStart, endDate: semesterEnd }])
+      if (semesterStart && semesterEnd) {
+        const existingSemester = semesters.find(s => s.name === semesterName)
+        if (!existingSemester) {
+          const newSem = { name: semesterName, startDate: semesterStart, endDate: semesterEnd }
+          setSemesters(prev => [...prev, newSem])
+        }
       }
     }
 
