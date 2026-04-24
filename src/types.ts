@@ -2,6 +2,14 @@ export type AppTab = 'home' | 'schedule' | 'calendar' | 'import' | 'settings' | 
 
 export type WeekdayCode = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU'
 
+export interface Semester {
+  id: string
+  name: string
+  startDate: string
+  endDate: string
+  isActive: boolean
+}
+
 export interface CourseEvent {
   id: string
   uid?: string
@@ -13,6 +21,8 @@ export interface CourseEvent {
   color?: string
   recurrenceRule?: string
   reminderMinutes?: number
+  semesterId?: string
+  isFavorite?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -24,6 +34,7 @@ export interface ImportRecord {
   totalParsed: number
   inserted: number
   skippedAsDuplicate: number
+  semesterId?: string
 }
 
 export interface ImportResult {
@@ -33,8 +44,10 @@ export interface ImportResult {
 }
 
 export interface BackupPayload {
-  version: 1
+  version: 2
   exportedAt: string
   events: CourseEvent[]
   records: ImportRecord[]
+  semesters: Semester[]
+  activeSemesterId?: string
 }

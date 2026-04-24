@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import type { CourseEvent } from '../types'
 import { getWeekDays, isSameDate, sortByStart, startOfWeek } from '../lib/date'
+import { useSwipe } from '../lib/useSwipe'
 
 interface ScheduleViewProps {
   events: CourseEvent[]
@@ -45,6 +46,12 @@ export function ScheduleView({ events, onEditEvent }: ScheduleViewProps) {
     }
     return `${start.month() + 1}/${start.date()} - ${end.month() + 1}/${end.date()}`
   }, [days])
+
+  const { handlers: swipeHandlers } = useSwipe({
+    onSwipeLeft: () => setWeekCursor((prev) => prev.add(7, 'day')),
+    onSwipeRight: () => setWeekCursor((prev) => prev.subtract(7, 'day')),
+    threshold: 60,
+  })
 
   function goToPrevWeek() {
     setWeekCursor((prev) => prev.subtract(7, 'day'))
@@ -108,7 +115,7 @@ export function ScheduleView({ events, onEditEvent }: ScheduleViewProps) {
         </p>
       )}
 
-      <div className="week-grid">
+      <div className="week-grid" {...swipeHandlers}>
         {days.map((day) => {
           const dayKey = day.format('YYYY-MM-DD')
           const dayEvents = sortByStart(events.filter((event) => isSameDate(event.start, day)))

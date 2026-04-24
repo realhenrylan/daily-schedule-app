@@ -13,7 +13,7 @@ import { addImportRecord, clearEvents, clearImportRecords, getAllEvents, getImpo
 import { exportBackupJson, importBackupJson } from './lib/backup'
 import { sortByStart } from './lib/date'
 import { disablePushForDevice, enablePushForDevice, getDispatchLogs, getOrCreateDeviceId, getPushSubscribed, sendTestPush, syncDeviceReminders, type PushDispatchLog } from './lib/push'
-import type { AppTab, CourseEvent, ImportRecord } from './types'
+import type { AppTab, CourseEvent, ImportRecord, Semester } from './types'
 
 type ThemeMode = 'light' | 'dark'
 
@@ -43,6 +43,8 @@ function App() {
     const saved = localStorage.getItem('schedule-reminder-minutes')
     return saved ? Number.parseInt(saved, 10) : 30
   })
+  const [semesters, setSemesters] = useState<Semester[]>([])
+  const [activeSemesterId, setActiveSemesterId] = useState<string | null>(null)
   const showOps = useMemo(() => {
     if (typeof window === 'undefined') return false
     const fromQuery = new URLSearchParams(window.location.search).get('ops') === '1'
@@ -156,6 +158,33 @@ function App() {
     return new Set(events.map((event) => `${event.uid || event.title}|${event.start}`))
   }, [events])
 
+  const conflictEvents = useMemo(() => {
+    const conflicts: CourseEvent[][] = []
+    const sorted = sortByStart(events)
+    for (let i = 0; i < sorted.length; i++) {
+      for (let j = i + 1; j < sorted.length; j++) {
+        const a = sorted[i]
+        const b = sorted[j]
+        const aStart = dayjs(a.start)
+        const aEnd = dayjs(a.end)
+        const bStart = dayjs(b.start)
+        const bEnd = dayjs(b.end)
+        if (aStart.isBefore(bEnd) && bStart.isBefore(aEnd)) {
+          const existing = conflicts.find(
+            (group) => group.some((e) => e.id === a.id || e.id === b.id),
+          )
+          if (existing) {
+            if (!existing.some((e) => e.id === a.id)) existing.push(a)
+            if (!existing.some((e) => e.id === b.id)) existing.push(b)
+          } else {
+            conflicts.push([a, b])
+          }
+        }
+      }
+    }
+    return conflicts
+  }, [events])
+
   const filteredEvents = useMemo(() => {
     const kw = searchText.trim().toLowerCase()
     return sortByStart(
@@ -217,6 +246,52 @@ function App() {
     setEvents(sortByStart(restored.events))
     setRecords(restored.records)
     setActiveTab('schedule')
+  }
+
+  async function handleToggleFavorite(eventId: string) {
+    const event = events.find((e) => e.id === eventId)
+    if (!event) return
+    const updated = { ...event, isFavorite: !event.isFavorite, updatedAt: new Date().toISOString() }
+    await replaceEvents(events.map((e) => (e.id === eventId ? updated : e)))
+    setEvents((prev) => sortByStart(prev.map((e) => (e.id === eventId ? updated : e))))
+  }
+
+  function handleQuickAdd() {
+    const now = dayjs()
+    const newEvent: CourseEvent = {
+      id: crypto.randomUUID(),
+      title: '',
+      start: now.startOf('hour').add(1, 'hour').toISOString(),
+      end: now.startOf('hour').add(2, 'hour').toISOString(),
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+    }
+    setEditingEvent(newEvent)
+  }
+
+  function handleAddSemester(name: string) {
+    const newSemester: Semester = {
+      id: crypto.randomUUID(),
+      name,
+      startDate: new Date().toISOString(),
+      endDate: new Date().toISOString(),
+      isActive: false,
+    }
+    setSemesters((prev) => [...prev, newSemester])
+  }
+
+  function handleSelectSemester(id: string) {
+    setActiveSemesterId(id)
+    localStorage.setItem('schedule-active-semester', id)
+  }
+
+  function handleDeleteSemester(id: string) {
+    if (!window.confirm('确认删除该学期？该操作不会删除课程数据。')) return
+    setSemesters((prev) => prev.filter((s) => s.id !== id))
+    if (activeSemesterId === id) {
+      setActiveSemesterId(null)
+      localStorage.removeItem('schedule-active-semester')
+    }
   }
 
   async function handleSaveEditedEvent(updated: CourseEvent) {
@@ -370,7 +445,7 @@ function App() {
         </section>
 
         {isLoading ? <section className="panel view-stage">加载中...</section> : null}
-        {!isLoading && activeTab === 'home' ? <div className="view-stage"><HomeView events={filteredEvents} /></div> : null}
+        {!isLoading && activeTab === 'home' ? <div className="view-stage"><HomeView events={filteredEvents} conflictEvents={conflictEvents} onToggleFavorite={handleToggleFavorite} onAddEvent={handleQuickAdd} /></div> : null}
         {!isLoading && activeTab === 'schedule' ? <div className="view-stage"><ScheduleView events={filteredEvents} onEditEvent={setEditingEvent} /></div> : null}
         {!isLoading && activeTab === 'calendar' ? <div className="view-stage"><CalendarView events={filteredEvents} onEditEvent={setEditingEvent} /></div> : null}
         {!isLoading && activeTab === 'import' ? (
@@ -380,6 +455,8 @@ function App() {
           <div className="view-stage">
             <SettingsView
               records={records}
+              semesters={semesters}
+              activeSemesterId={activeSemesterId}
               pushEnabled={pushEnabled}
               pushStatusText={pushStatusText}
               reminderMinutes={reminderMinutes}
@@ -391,6 +468,9 @@ function App() {
               onClearAll={handleClearAll}
               onExportBackup={handleExportBackup}
               onImportBackup={handleImportBackup}
+              onAddSemester={handleAddSemester}
+              onSelectSemester={handleSelectSemester}
+              onDeleteSemester={handleDeleteSemester}
             />
           </div>
         ) : null}

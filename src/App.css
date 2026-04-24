@@ -490,8 +490,10 @@ body {
 .week-grid {
   margin-top: 14px;
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .day-col {
@@ -994,6 +996,11 @@ button.danger {
   opacity: 0.9;
 }
 
+.push-buttons-grid button.danger {
+  background: var(--danger);
+  color: white;
+}
+
 .backup-buttons {
   display: flex;
   flex-direction: column;
@@ -1196,4 +1203,191 @@ button.danger {
     padding: 4px;
     margin-bottom: 2px;
   }
+}
+
+.conflict-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #856404;
+}
+
+:root[data-theme='dark'] .conflict-warning {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffc107;
+}
+
+.conflict-icon {
+  font-size: 16px;
+}
+
+.favorite-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #ffc107;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.favorite-btn:active {
+  transform: scale(0.9);
+}
+
+.card {
+  position: relative;
+}
+
+.quick-add-btn {
+  width: 100%;
+  height: 48px;
+  margin-top: 16px;
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.quick-add-btn:active {
+  background: var(--bg);
+}
+
+.favorite-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
+}
+
+.favorite-section h3 {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.favorite-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.favorite-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--bg);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.favorite-item button {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--surface-hover);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.swipe-container {
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.swipe-content {
+  transition: transform 300ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.semester-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.semester-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--bg);
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.semester-item.active {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.semester-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.semester-actions button {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.semester-actions button:active {
+  opacity: 0.8;
+}
+
+.semester-actions .danger-text {
+  color: var(--danger);
+}
+
+.add-semester {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.add-semester input {
+  flex: 1;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0 12px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.add-semester input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.add-semester button {
+  height: 40px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.add-semester button:active {
+  opacity: 0.9;
 }
