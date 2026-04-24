@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import dayjs from 'dayjs'
-import { readJson } from '../_shared'
-import { getReminders, setReminders, withRedisGuard, requirePost, type ReminderRecord } from '../_store'
+import { readJson } from '../_shared.js'
+import { getReminders, setReminders, withRedisGuard, requirePost, type ReminderRecord } from '../_store.js'
 
 type EventInput = {
   id: string

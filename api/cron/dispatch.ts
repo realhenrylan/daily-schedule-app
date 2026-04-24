@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import dayjs from 'dayjs'
-import { pushMessage, ensureVapidConfigured } from '../_shared'
-import { getReminders, getSubscriptions, setReminders, withRedisGuard } from '../_store'
+import { pushMessage, ensureVapidConfigured } from '../_shared.js'
+import { getReminders, getSubscriptions, setReminders, withRedisGuard } from '../_store.js'
 
 function checkCronSecret(req: VercelRequest, res: VercelResponse): boolean {
   const expected = process.env.CRON_SECRET

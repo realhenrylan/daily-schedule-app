@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { ensureVapidConfigured, getPublicKey } from '../_shared'
+import { ensureVapidConfigured, getPublicKey } from '../_shared.js'
 
 export default function handler(_req: VercelRequest, res: VercelResponse) {
   if (!ensureVapidConfigured(res)) {

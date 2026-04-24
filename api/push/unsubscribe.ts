@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { readJson } from '../_shared'
-import { getSubscriptions, setSubscriptions, withRedisGuard, requirePost } from '../_store'
+import { readJson } from '../_shared.js'
+import { getSubscriptions, setSubscriptions, withRedisGuard, requirePost } from '../_store.js'
 
 type Body = {
   deviceId: string
