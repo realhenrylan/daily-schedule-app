@@ -493,11 +493,7 @@ function extractSemesterFromFileName(fileName: string): string | null {
         <div className="topbar-left">
           <h1>课程日历</h1>
           <p>
-            {currentSemester ? (
-              <>{currentSemester.name} · {currentSemesterInfo.count}节课 · {currentSemesterInfo.uniqueCourses}门课</>
-            ) : (
-              <>无学期 · 0节课</>
-            )}
+            {currentSemester ? currentSemester.name : '无学期'}
           </p>
         </div>
         <div className="topbar-right">
