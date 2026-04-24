@@ -8,154 +8,90 @@ interface ScheduleViewProps {
   onEditEvent: (event: CourseEvent) => void
 }
 
-function previousWeekStart(ts: number): number {
-  return dayjs(ts).subtract(7, 'day').startOf('day').valueOf()
-}
-
-function nextWeekStart(ts: number): number {
-  return dayjs(ts).add(7, 'day').startOf('day').valueOf()
-}
-
 export function ScheduleView({ events, onEditEvent }: ScheduleViewProps) {
   const [weekCursor, setWeekCursor] = useState(() => startOfWeek(dayjs()))
 
-  const weekTsList = useMemo(() => {
-    const unique = new Set(events.map((event) => startOfWeek(dayjs(event.start)).startOf('day').valueOf()))
-    return [...unique].sort((a, b) => a - b)
-  }, [events])
-
   const days = useMemo(() => getWeekDays(weekCursor), [weekCursor])
-  const rangeLabel = `${days[0].format('MM/DD')} - ${days[6].format('MM/DD')}`
+  const today = dayjs()
+  const todayKey = today.format('YYYY-MM-DD')
 
-  const currentWeekTs = weekCursor.startOf('day').valueOf()
-  const hasEventsThisWeek = weekTsList.includes(currentWeekTs)
-
-  const prevEventWeekTs = useMemo(() => {
-    for (let i = weekTsList.length - 1; i >= 0; i -= 1) {
-      if (weekTsList[i] < currentWeekTs) return weekTsList[i]
+  const weekLabel = useMemo(() => {
+    const start = days[0]
+    const end = days[6]
+    if (start.month() === end.month()) {
+      return `${start.month() + 1}月${start.date()}日 - ${end.date()}日`
     }
-    return null
-  }, [weekTsList, currentWeekTs])
-
-  const nextEventWeekTs = useMemo(() => {
-    for (let i = 0; i < weekTsList.length; i += 1) {
-      if (weekTsList[i] > currentWeekTs) return weekTsList[i]
-    }
-    return null
-  }, [weekTsList, currentWeekTs])
-
-  const firstWeekTs = weekTsList[0] ?? null
-  const lastWeekTs = weekTsList[weekTsList.length - 1] ?? null
-
-  function jumpPrevEventWeek() {
-    if (weekTsList.length === 0) {
-      setWeekCursor((prev) => prev.subtract(7, 'day'))
-      return
-    }
-
-    let target = prevEventWeekTs ?? lastWeekTs
-    if (target === null) {
-      target = previousWeekStart(currentWeekTs)
-    }
-
-    if (target === currentWeekTs) {
-      target = previousWeekStart(currentWeekTs)
-    }
-
-    setWeekCursor(dayjs(target))
-  }
-
-  function jumpNextEventWeek() {
-    if (weekTsList.length === 0) {
-      setWeekCursor((prev) => prev.add(7, 'day'))
-      return
-    }
-
-    let target = nextEventWeekTs ?? firstWeekTs
-    if (target === null) {
-      target = nextWeekStart(currentWeekTs)
-    }
-
-    if (target === currentWeekTs) {
-      target = nextWeekStart(currentWeekTs)
-    }
-
-    setWeekCursor(dayjs(target))
-  }
+    return `${start.month() + 1}/${start.date()} - ${end.month() + 1}/${end.date()}`
+  }, [days])
 
   return (
     <section className="panel">
       <header className="schedule-header">
         <h2>课表</h2>
-        <div className="schedule-actions">
-          <button type="button" onClick={() => setWeekCursor((prev) => prev.subtract(7, 'day'))}>
-            上一周
-          </button>
-          <strong>{rangeLabel}</strong>
-          <button type="button" onClick={() => setWeekCursor((prev) => prev.add(7, 'day'))}>
-            下一周
-          </button>
-          <button type="button" onClick={() => setWeekCursor(startOfWeek(dayjs()))}>
-            回到本周
-          </button>
-        </div>
       </header>
 
-      <div className="schedule-actions schedule-actions-secondary">
-        <label className="date-jump">
-          跳转日期
-          <input
-            type="date"
-            value={weekCursor.format('YYYY-MM-DD')}
-            onChange={(event) => setWeekCursor(startOfWeek(dayjs(event.target.value)))}
-          />
-        </label>
-
-        <button type="button" onClick={jumpPrevEventWeek}>
-          上一有课周
+      <div className="schedule-week-nav">
+        <button type="button" onClick={() => setWeekCursor((prev) => prev.subtract(7, 'day'))}>
+          ‹
         </button>
-        <button type="button" onClick={jumpNextEventWeek}>
-          下一有课周
+        <span>{weekLabel}</span>
+        <button type="button" onClick={() => setWeekCursor((prev) => prev.add(7, 'day'))}>
+          ›
         </button>
       </div>
 
-      <details className="schedule-debug">
-        <summary>跳转调试信息</summary>
-        <div>
-          <p>当前周起始：{dayjs(currentWeekTs).format('YYYY-MM-DD')}</p>
-          <p>有课周数量：{weekTsList.length}</p>
-          <p>上一有课周：{prevEventWeekTs ? dayjs(prevEventWeekTs).format('YYYY-MM-DD') : '无'}</p>
-          <p>下一有课周：{nextEventWeekTs ? dayjs(nextEventWeekTs).format('YYYY-MM-DD') : '无'}</p>
-        </div>
-      </details>
-
-      {!hasEventsThisWeek ? (
-        <p className="muted">当前周没有课程，可使用“上一有课周 / 下一有课周”快速跳转。</p>
-      ) : null}
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+        <button
+          type="button"
+          onClick={() => setWeekCursor(startOfWeek(today))}
+          style={{
+            border: 'none',
+            background: 'var(--accent-light)',
+            color: 'var(--accent)',
+            borderRadius: '8px',
+            padding: '6px 14px',
+            fontSize: '13px',
+            fontWeight: 500,
+          }}
+        >
+          回到本周
+        </button>
+      </div>
 
       <div className="week-grid">
         {days.map((day) => {
+          const dayKey = day.format('YYYY-MM-DD')
           const dayEvents = sortByStart(events.filter((event) => isSameDate(event.start, day)))
+          const isToday = dayKey === todayKey
 
           return (
-            <div key={day.toISOString()} className="day-col">
+            <div key={dayKey} className={`day-col ${isToday ? 'today' : ''}`}>
               <h3>
-                {day.format('ddd')} <span>{day.format('MM/DD')}</span>
+                {day.format('ddd')}
+                <span>{day.format('MM/DD')}</span>
               </h3>
               {dayEvents.length === 0 ? (
-                <div className="empty small">无课程</div>
+                <div className="empty" style={{ padding: '8px 4px', fontSize: '12px' }}>
+                  -
+                </div>
               ) : (
                 dayEvents.map((event) => (
-                  <article key={event.id} className="event-block" style={{ borderLeftColor: event.color || '#4F46E5' }}>
-                    <div className="event-row">
-                      <strong>{event.title}</strong>
-                      <button type="button" className="edit-inline-btn" onClick={() => onEditEvent(event)}>
-                        编辑
-                      </button>
-                    </div>
-                    <span>{formatTimeRange(event)}</span>
-                    {event.location ? <small>{event.location}</small> : null}
-                  </article>
+                  <div
+                    key={event.id}
+                    className="event-block"
+                    style={{ borderLeftColor: event.color || 'var(--accent)' }}
+                    onClick={() => onEditEvent(event)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        onEditEvent(event)
+                      }
+                    }}
+                  >
+                    <strong>{event.title}</strong>
+                    <span>{dayjs(event.start).format('HH:mm')}</span>
+                  </div>
                 ))
               )}
             </div>

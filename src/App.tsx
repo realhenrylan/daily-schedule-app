@@ -314,48 +314,47 @@ function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <div>
+        <div className="topbar-left">
           <h1>课程日历</h1>
-          <p>iPhone 可添加到主屏幕的课表 PWA</p>
+          <p>{events.length} 节课 · {records.length} 次导入</p>
         </div>
-        <div className="topbar-controls">
+        <div className="topbar-right">
           <button
             type="button"
             className="theme-toggle"
             onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
             aria-label="切换深浅色主题"
           >
-            {theme === 'dark' ? '切换浅色' : '切换深色'}
+            {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          <div className="topbar-stats">
-            <span>课程总数 {events.length}</span>
-            <span>导入记录 {records.length}</span>
-          </div>
         </div>
       </header>
 
       <TabNav activeTab={activeTab} onChange={handleTabChange} tabs={navTabs} />
 
       <main className="content" data-transition-direction={transitionDirection}>
-        <section className="panel filter-bar view-stage" aria-label="搜索与筛选">
-          <label>
-            搜索课程
+        <section className="filter-bar view-stage" aria-label="搜索与筛选">
+          <div className="filter-row">
             <input
               value={searchText}
               onChange={(event) => setSearchText(event.target.value)}
-              placeholder="按课程名/地点/备注筛选"
+              placeholder="搜索课程..."
             />
-          </label>
-          <label>
-            指定日期
-            <input type="date" value={filterDate} onChange={(event) => setFilterDate(event.target.value)} />
-          </label>
-          <button type="button" onClick={() => { setSearchText(''); setFilterDate('') }}>
-            清空筛选
-          </button>
-          <small>
-            当前显示 {filteredEvents.length} / {events.length} 条
-          </small>
+            <button type="button" onClick={() => { setSearchText(''); setFilterDate('') }}>
+              清除
+            </button>
+          </div>
+          <div className="filter-row">
+            <input
+              type="date"
+              value={filterDate}
+              onChange={(event) => setFilterDate(event.target.value)}
+              style={{ flex: 'none', width: '160px' }}
+            />
+            <small style={{ lineHeight: '40px' }}>
+              {filteredEvents.length} 条
+            </small>
+          </div>
         </section>
 
         {isLoading ? <section className="panel view-stage">加载中...</section> : null}

@@ -35,14 +35,14 @@ export function CalendarView({ events, onEditEvent }: CalendarViewProps) {
   return (
     <section className="panel">
       <header className="calendar-header">
-        <h2>月历</h2>
+        <h2>日历</h2>
         <div className="calendar-actions">
           <button type="button" onClick={() => setMonthCursor((prev) => prev.subtract(1, 'month'))}>
-            上月
+            ‹
           </button>
-          <strong>{monthCursor.format('YYYY 年 M 月')}</strong>
+          <strong style={{ minWidth: '100px', textAlign: 'center' }}>{monthCursor.format('YYYY年M月')}</strong>
           <button type="button" onClick={() => setMonthCursor((prev) => prev.add(1, 'month'))}>
-            下月
+            ›
           </button>
         </div>
       </header>
@@ -76,30 +76,38 @@ export function CalendarView({ events, onEditEvent }: CalendarViewProps) {
               onClick={() => setSelectedDate(key)}
             >
               <span>{date.date()}</span>
-              {count > 0 ? <small>{count} 节</small> : null}
+              {count > 0 ? <small>{count}</small> : null}
             </button>
           )
         })}
       </div>
 
-      <section className="list date-list">
-        <h3>{dayjs(selectedDate).format('YYYY/MM/DD ddd')} 的课程</h3>
+      <section className="date-list">
+        <h3>{dayjs(selectedDate).format('M月D日')}</h3>
         {selectedEvents.length === 0 ? (
-          <div className="empty">当天没有课程</div>
+          <div className="empty" style={{ padding: '24px' }}>
+            当天没有课程
+          </div>
         ) : (
           selectedEvents.map((event) => (
-            <article key={event.id} className="card">
+            <article
+              key={event.id}
+              className="card"
+              onClick={() => onEditEvent(event)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  onEditEvent(event)
+                }
+              }}
+            >
               <header>
                 <strong>{event.title}</strong>
                 <span>{formatTimeRange(event)}</span>
               </header>
-              {event.location ? <p>{event.location}</p> : null}
+              {event.location ? <p>📍 {event.location}</p> : null}
               {event.note ? <small>{event.note}</small> : null}
-              <div className="event-actions">
-                <button type="button" className="edit-inline-btn" onClick={() => onEditEvent(event)}>
-                  编辑课程
-                </button>
-              </div>
             </article>
           ))
         )}

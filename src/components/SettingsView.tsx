@@ -26,69 +26,104 @@ export function SettingsView({
   onImportBackup,
 }: SettingsViewProps) {
   return (
-    <section className="panel">
-      <h2>设置</h2>
-      <p className="muted">当前已导入 {records.length} 次。</p>
+    <>
+      <section className="panel">
+        <h2>设置</h2>
 
-      <div className="push-panel">
-        <h3>课程推送提醒</h3>
-        <p className="muted">{pushStatusText}</p>
-        <div className="schedule-actions schedule-actions-secondary">
-          {pushEnabled ? (
-            <button type="button" onClick={() => void onDisablePush()}>
-              关闭推送
-            </button>
-          ) : (
-            <button type="button" onClick={() => void onEnablePush()}>
-              开启推送
-            </button>
-          )}
-          <button type="button" onClick={() => void onSyncPush()}>
-            同步提醒
-          </button>
-          <button type="button" onClick={() => void onTestPush()}>
-            发送测试通知
-          </button>
+        <div className="push-panel">
+          <h3>🔔 推送提醒</h3>
+          <p className="push-status">{pushStatusText}</p>
+          <div className="push-buttons">
+            {pushEnabled ? (
+              <>
+                <button type="button" onClick={() => void onSyncPush()}>
+                  同步
+                </button>
+                <button type="button" onClick={() => void onTestPush()}>
+                  测试
+                </button>
+                <button
+                  type="button"
+                  className="danger"
+                  onClick={() => void onDisablePush()}
+                  style={{ width: 'auto', flex: 'none', padding: '0 14px' }}
+                >
+                  关闭
+                </button>
+              </>
+            ) : (
+              <button type="button" className="primary" onClick={() => void onEnablePush()}>
+                开启推送
+              </button>
+            )}
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div className="schedule-actions schedule-actions-secondary">
-        <button type="button" onClick={onExportBackup}>
-          导出备份（JSON）
-        </button>
-        <label className="file-picker">
-          导入备份（JSON）
-          <input
-            type="file"
-            accept="application/json,.json"
-            onChange={(event) => {
-              const file = event.target.files?.[0]
-              if (file) {
-                void onImportBackup(file)
-              }
-              event.currentTarget.value = ''
+      <section className="panel">
+        <h3>💾 数据管理</h3>
+        <p className="muted">共导入 {records.length} 次课程数据</p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px' }}>
+          <button
+            type="button"
+            onClick={onExportBackup}
+            style={{
+              width: '100%',
+              height: '48px',
+              border: '1px solid var(--border)',
+              borderRadius: '12px',
+              background: 'var(--surface)',
+              color: 'var(--text)',
+              fontSize: '15px',
+              fontWeight: 500,
             }}
-          />
-        </label>
-      </div>
+          >
+            导出备份
+          </button>
+          <label className="file-picker" style={{ width: '100%', justifyContent: 'center' }}>
+            导入备份
+            <input
+              type="file"
+              accept="application/json,.json"
+              onChange={(event) => {
+                const file = event.target.files?.[0]
+                if (file) {
+                  void onImportBackup(file)
+                }
+                event.currentTarget.value = ''
+              }}
+            />
+          </label>
+        </div>
+      </section>
 
-      <button type="button" className="danger" onClick={() => void onClearAll()}>
-        清空本地课程数据
-      </button>
+      <section className="panel">
+        <h3>📋 导入记录</h3>
+        <div className="list">
+          {records.length === 0 ? (
+            <div className="empty">暂无导入记录</div>
+          ) : (
+            records.slice().reverse().map((record) => (
+              <article className="card" key={record.id}>
+                <header>
+                  <strong>{record.sourceName}</strong>
+                  <span>{new Date(record.importedAt).toLocaleDateString()}</span>
+                </header>
+                <small>
+                  新增 {record.inserted} 条 · 跳过 {record.skippedAsDuplicate} 条
+                </small>
+              </article>
+            ))
+          )}
+        </div>
+      </section>
 
-      <div className="list">
-        {records.slice().reverse().map((record) => (
-          <article className="card" key={record.id}>
-            <header>
-              <strong>{record.sourceName}</strong>
-              <span>{new Date(record.importedAt).toLocaleString()}</span>
-            </header>
-            <small>
-              解析 {record.totalParsed} 条，新增 {record.inserted} 条，跳过重复 {record.skippedAsDuplicate} 条
-            </small>
-          </article>
-        ))}
-      </div>
-    </section>
+      <section className="panel">
+        <button type="button" className="danger" onClick={() => void onClearAll()}>
+          清空所有课程数据
+        </button>
+      </section>
+    </>
   )
 }
