@@ -5,6 +5,18 @@ const SYNC_ENDPOINT = '/api/push/sync'
 const TEST_ENDPOINT = '/api/push/test'
 const DEVICE_ID_STORAGE_KEY = 'schedule-device-id'
 
+async function readApiError(response: Response, fallback: string): Promise<Error> {
+  try {
+    const data = (await response.json()) as { error?: string }
+    if (data?.error) {
+      return new Error(data.error)
+    }
+  } catch {
+    // ignore parse errors and use fallback
+  }
+  return new Error(fallback)
+}
+
 export interface ReminderEventInput {
   id: string
   title: string
@@ -44,7 +56,7 @@ async function ensurePermission(): Promise<NotificationPermission> {
 async function getVapidPublicKey(): Promise<string> {
   const res = await fetch(VAPID_PUBLIC_KEY_ENDPOINT)
   if (!res.ok) {
-    throw new Error('无法获取推送公钥，请检查服务端配置')
+    throw await readApiError(res, '无法获取推送公钥，请检查服务端配置')
   }
   const data = (await res.json()) as { publicKey: string }
   if (!data.publicKey) {
@@ -77,7 +89,7 @@ export async function enablePushForDevice(deviceId: string): Promise<void> {
   })
 
   if (!res.ok) {
-    throw new Error('订阅推送失败')
+    throw await readApiError(res, '订阅推送失败')
   }
 }
 
@@ -103,7 +115,7 @@ export async function syncDeviceReminders(deviceId: string, events: ReminderEven
   })
 
   if (!res.ok) {
-    throw new Error('同步提醒失败')
+    throw await readApiError(res, '同步提醒失败')
   }
 }
 
@@ -114,7 +126,7 @@ export async function sendTestPush(deviceId: string): Promise<void> {
     body: JSON.stringify({ deviceId }),
   })
   if (!res.ok) {
-    throw new Error('测试推送发送失败')
+    throw await readApiError(res, '测试推送发送失败')
   }
 }
 

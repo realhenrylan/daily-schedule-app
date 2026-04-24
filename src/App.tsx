@@ -251,8 +251,9 @@ function App() {
       const deviceId = getOrCreateDeviceId()
       await sendTestPush(deviceId)
       setPushStatusText('测试通知已发送')
-    } catch {
-      setPushStatusText('测试通知发送失败')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '测试通知发送失败'
+      setPushStatusText(`测试通知发送失败：${message}`)
     }
   }
 
