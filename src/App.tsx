@@ -267,13 +267,15 @@ function App() {
     try {
       const deviceId = getOrCreateDeviceId()
       await enablePushForDevice(deviceId)
-      await syncDeviceReminders(
-        deviceId,
-        eventsRef.current.map((event) => ({ id: event.id, title: event.title, start: event.start })),
-        reminderMinutes,
-      )
+      const eventsWithReminder = eventsRef.current.map((event) => ({
+        id: event.id,
+        title: event.title,
+        start: event.start,
+        reminderMinutes: event.reminderMinutes ?? reminderMinutes,
+      }))
+      await syncDeviceReminders(deviceId, eventsWithReminder, reminderMinutes)
       setPushEnabled(true)
-      setPushStatusText(`推送已开启，课前 ${reminderMinutes} 分钟提醒`)
+      setPushStatusText('推送已开启')
       await handleRefreshPushLogs()
     } catch (error) {
       const message = error instanceof Error ? error.message : '开启推送失败'
@@ -295,12 +297,14 @@ function App() {
   async function handleSyncPush() {
     try {
       const deviceId = getOrCreateDeviceId()
-      await syncDeviceReminders(
-        deviceId,
-        eventsRef.current.map((event) => ({ id: event.id, title: event.title, start: event.start })),
-        reminderMinutes,
-      )
-      setPushStatusText(`已同步提醒计划，课前 ${reminderMinutes} 分钟提醒`)
+      const eventsWithReminder = eventsRef.current.map((event) => ({
+        id: event.id,
+        title: event.title,
+        start: event.start,
+        reminderMinutes: event.reminderMinutes ?? reminderMinutes,
+      }))
+      await syncDeviceReminders(deviceId, eventsWithReminder, reminderMinutes)
+      setPushStatusText('已同步提醒计划')
       await handleRefreshPushLogs()
     } catch {
       setPushStatusText('同步提醒失败')
@@ -410,6 +414,7 @@ function App() {
         <EventEditorModal
           key={editingEvent.id}
           event={editingEvent}
+          defaultReminderMinutes={reminderMinutes}
           onClose={() => setEditingEvent(null)}
           onSave={handleSaveEditedEvent}
           onDelete={handleDeleteEvent}

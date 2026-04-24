@@ -22,6 +22,7 @@ export interface ReminderEventInput {
   id: string
   title: string
   start: string
+  reminderMinutes?: number
 }
 
 export interface PushDispatchLog {

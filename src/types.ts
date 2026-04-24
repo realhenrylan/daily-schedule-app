@@ -12,6 +12,7 @@ export interface CourseEvent {
   note?: string
   color?: string
   recurrenceRule?: string
+  reminderMinutes?: number
   createdAt: string
   updatedAt: string
 }

@@ -4,6 +4,7 @@ import type { CourseEvent } from '../types'
 
 interface EventEditorModalProps {
   event: CourseEvent
+  defaultReminderMinutes: number
   onClose: () => void
   onSave: (event: CourseEvent) => Promise<void>
   onDelete: (eventId: string) => Promise<void>
@@ -11,14 +12,25 @@ interface EventEditorModalProps {
 
 const PRESET_COLORS = ['#4F46E5', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
 
+const REMINDER_OPTIONS = [
+  { value: 0, label: '不提醒' },
+  { value: 5, label: '5 分钟' },
+  { value: 10, label: '10 分钟' },
+  { value: 15, label: '15 分钟' },
+  { value: 30, label: '30 分钟' },
+  { value: 60, label: '1 小时' },
+]
+
 function toLocalInputValue(iso: string): string {
   const d = dayjs(iso)
   return d.format('YYYY-MM-DDTHH:mm')
 }
 
-export function EventEditorModal({ event, onClose, onSave, onDelete }: EventEditorModalProps) {
+export function EventEditorModal({ event, defaultReminderMinutes, onClose, onSave, onDelete }: EventEditorModalProps) {
   const [draft, setDraft] = useState<CourseEvent>(event)
   const [isSaving, setIsSaving] = useState(false)
+
+  const currentReminder = draft.reminderMinutes ?? defaultReminderMinutes
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -113,6 +125,40 @@ export function EventEditorModal({ event, onClose, onSave, onDelete }: EventEdit
                 />
               ))}
             </div>
+          </div>
+
+          <div>
+            <p style={{ margin: '0 0 8px', fontSize: '14px', color: 'var(--text-secondary)' }}>提醒时间</p>
+            <div className="reminder-options">
+              {REMINDER_OPTIONS.map((option) => {
+                const isActive = currentReminder === option.value
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={isActive ? 'reminder-option active' : 'reminder-option'}
+                    onClick={() => {
+                      if (option.value === defaultReminderMinutes) {
+                        setDraft((prev) => ({ ...prev, reminderMinutes: undefined }))
+                      } else {
+                        setDraft((prev) => ({ ...prev, reminderMinutes: option.value }))
+                      }
+                    }}
+                  >
+                    {option.label}
+                  </button>
+                )
+              })}
+            </div>
+            {draft.reminderMinutes !== undefined && (
+              <button
+                type="button"
+                className="use-default-btn"
+                onClick={() => setDraft((prev) => ({ ...prev, reminderMinutes: undefined }))}
+              >
+                使用默认设置（{defaultReminderMinutes === 60 ? '1 小时' : `${defaultReminderMinutes} 分钟`}）
+              </button>
+            )}
           </div>
 
           <div className="modal-actions">
