@@ -11,6 +11,7 @@ import { TabNav } from './components/TabNav'
 import { addImportRecord, clearEvents, clearImportRecords, getAllEvents, getImportRecords, replaceEvents, replaceImportRecords, saveEvents } from './lib/db'
 import { exportBackupJson, importBackupJson } from './lib/backup'
 import { sortByStart } from './lib/date'
+import { disablePushForDevice, enablePushForDevice, getOrCreateDeviceId, getPushSubscribed, sendTestPush, syncDeviceReminders } from './lib/push'
 import type { AppTab, CourseEvent, ImportRecord } from './types'
 
 type ThemeMode = 'light' | 'dark'
@@ -33,6 +34,8 @@ function App() {
   const [filterDate, setFilterDate] = useState('')
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null)
   const [transitionDirection, setTransitionDirection] = useState<TransitionDirection>('forward')
+  const [pushEnabled, setPushEnabled] = useState(false)
+  const [pushStatusText, setPushStatusText] = useState('推送未开启')
   const deleteTimerRef = useRef<number | null>(null)
   const eventsRef = useRef<CourseEvent[]>([])
   const [theme, setTheme] = useState<ThemeMode>(() => {
@@ -74,6 +77,20 @@ function App() {
         window.clearTimeout(deleteTimerRef.current)
       }
     }
+  }, [])
+
+  useEffect(() => {
+    async function checkPush() {
+      try {
+        const subscribed = await getPushSubscribed()
+        setPushEnabled(subscribed)
+        setPushStatusText(subscribed ? '推送已开启，可接收课程提醒' : '推送未开启')
+      } catch {
+        setPushStatusText('当前设备不支持推送')
+      }
+    }
+
+    void checkPush()
   }, [])
 
   const eventsByStartKey = useMemo(() => {
@@ -187,6 +204,58 @@ function App() {
     setPendingDelete(null)
   }
 
+  async function handleEnablePush() {
+    try {
+      const deviceId = getOrCreateDeviceId()
+      await enablePushForDevice(deviceId)
+      await syncDeviceReminders(
+        deviceId,
+        eventsRef.current.map((event) => ({ id: event.id, title: event.title, start: event.start })),
+        30,
+      )
+      setPushEnabled(true)
+      setPushStatusText('推送已开启，默认课前 30 分钟提醒')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '开启推送失败'
+      setPushStatusText(`开启失败：${message}`)
+    }
+  }
+
+  async function handleDisablePush() {
+    try {
+      const deviceId = getOrCreateDeviceId()
+      await disablePushForDevice(deviceId)
+      setPushEnabled(false)
+      setPushStatusText('推送已关闭')
+    } catch {
+      setPushStatusText('关闭推送失败')
+    }
+  }
+
+  async function handleSyncPush() {
+    try {
+      const deviceId = getOrCreateDeviceId()
+      await syncDeviceReminders(
+        deviceId,
+        eventsRef.current.map((event) => ({ id: event.id, title: event.title, start: event.start })),
+        30,
+      )
+      setPushStatusText('已同步提醒计划')
+    } catch {
+      setPushStatusText('同步提醒失败')
+    }
+  }
+
+  async function handleTestPush() {
+    try {
+      const deviceId = getOrCreateDeviceId()
+      await sendTestPush(deviceId)
+      setPushStatusText('测试通知已发送')
+    } catch {
+      setPushStatusText('测试通知发送失败')
+    }
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -245,6 +314,12 @@ function App() {
           <div className="view-stage">
             <SettingsView
               records={records}
+              pushEnabled={pushEnabled}
+              pushStatusText={pushStatusText}
+              onEnablePush={handleEnablePush}
+              onDisablePush={handleDisablePush}
+              onSyncPush={handleSyncPush}
+              onTestPush={handleTestPush}
               onClearAll={handleClearAll}
               onExportBackup={handleExportBackup}
               onImportBackup={handleImportBackup}

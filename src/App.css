@@ -422,6 +422,19 @@ button.danger {
   margin-top: 10px;
 }
 
+.push-panel {
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--surface) 78%, transparent);
+}
+
+.push-panel h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
 .date-jump {
   display: inline-flex;
   align-items: center;
@@ -820,5 +833,9 @@ button.danger {
   .date-jump input {
     width: 100%;
     min-width: 0;
+  }
+
+  .push-panel .schedule-actions {
+    gap: 6px;
   }
 }
