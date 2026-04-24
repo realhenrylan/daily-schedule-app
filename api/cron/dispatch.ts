@@ -3,7 +3,27 @@ import dayjs from 'dayjs'
 import { pushMessage, ensureVapidConfigured } from '../_shared'
 import { getReminders, getSubscriptions, setReminders, withRedisGuard } from '../_store'
 
-export default async function handler(_req: VercelRequest, res: VercelResponse) {
+function checkCronSecret(req: VercelRequest, res: VercelResponse): boolean {
+  const expected = process.env.CRON_SECRET
+  if (!expected) {
+    res.status(500).json({ error: 'Missing CRON_SECRET' })
+    return false
+  }
+
+  const provided = req.headers.authorization?.replace('Bearer ', '')
+  if (provided !== expected) {
+    res.status(401).json({ error: 'Unauthorized' })
+    return false
+  }
+
+  return true
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (!checkCronSecret(req, res)) {
+    return
+  }
+
   if (!ensureVapidConfigured(res)) {
     return
   }
