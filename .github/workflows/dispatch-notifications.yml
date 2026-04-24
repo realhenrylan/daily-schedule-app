@@ -19,8 +19,16 @@ jobs:
             exit 1
           fi
 
-          curl -sS -X POST "$DISPATCH_URL" \
+          HTTP_CODE=$(curl -sS -o response.json -w "%{http_code}" -X POST "$DISPATCH_URL" \
             -H "Authorization: Bearer $CRON_SECRET" \
             -H "Content-Type: application/json" \
-            --data '{}' \
-            --fail
+            --data '{}')
+
+          echo "HTTP_CODE=$HTTP_CODE"
+          echo "Response body:"
+          cat response.json
+
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "Dispatch failed"
+            exit 1
+          fi
