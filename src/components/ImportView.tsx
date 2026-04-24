@@ -57,7 +57,7 @@ export function ImportView({ existingEvents, onConfirmImport }: ImportViewProps)
       <p className="muted">从学校教务系统或其他日历导出 .ics 文件</p>
 
       <label className="file-picker" style={{ width: '100%', justifyContent: 'center' }}>
-        {isImporting ? '解析中...' : '📁 选择 ICS 文件'}
+        {isImporting ? '解析中...' : '选择 ICS 文件'}
         <input
           type="file"
           accept=".ics,text/calendar"
@@ -82,7 +82,7 @@ export function ImportView({ existingEvents, onConfirmImport }: ImportViewProps)
             fontSize: '14px',
           }}
         >
-          ⚠️ {error}
+          {error}
         </div>
       ) : null}
 
@@ -91,13 +91,13 @@ export function ImportView({ existingEvents, onConfirmImport }: ImportViewProps)
           <div
             style={{
               marginTop: '16px',
-              padding: '12px',
+              padding: '14px',
               background: 'var(--accent-light)',
               borderRadius: '12px',
             }}
           >
-            <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
-              <strong style={{ fontSize: '18px', color: 'var(--accent)' }}>{dedupPreview.length}</strong> 条可导入
+            <div style={{ fontSize: '15px', color: 'var(--text-secondary)' }}>
+              <strong style={{ fontSize: '20px', color: 'var(--accent)' }}>{dedupPreview.length}</strong> 条可导入
               {preview.length - dedupPreview.length > 0 && (
                 <span className="muted">（{preview.length - dedupPreview.length} 条重复已跳过）</span>
               )}
@@ -113,7 +113,7 @@ export function ImportView({ existingEvents, onConfirmImport }: ImportViewProps)
               style={{
                 width: '100%',
                 height: '50px',
-                marginTop: '12px',
+                marginTop: '14px',
                 border: 'none',
                 borderRadius: '12px',
                 background: 'var(--accent)',
@@ -138,7 +138,7 @@ export function ImportView({ existingEvents, onConfirmImport }: ImportViewProps)
                   <strong>{event.title}</strong>
                   <span>{dayjs(event.start).format('M/D HH:mm')}</span>
                 </header>
-                {event.location ? <p>📍 {event.location}</p> : null}
+                {event.location ? <p>{event.location}</p> : null}
               </article>
             ))}
           </div>

@@ -106,7 +106,7 @@ export function CalendarView({ events, onEditEvent }: CalendarViewProps) {
                 <strong>{event.title}</strong>
                 <span>{formatTimeRange(event)}</span>
               </header>
-              {event.location ? <p>📍 {event.location}</p> : null}
+              {event.location ? <p>{event.location}</p> : null}
               {event.note ? <small>{event.note}</small> : null}
             </article>
           ))

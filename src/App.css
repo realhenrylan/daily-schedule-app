@@ -4,29 +4,28 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --font-base: 16px;
-  --font-title: 1.25rem;
-  --font-small: 0.875rem;
-  --control-height: 48px;
-  --control-height-sm: 40px;
+  --font-base: 17px;
+  --font-title: 1.3rem;
+  --font-small: 0.9rem;
+  --control-height: 50px;
+  --control-height-sm: 44px;
   --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  --bg: #f8f9fa;
+  --bg: #fafafa;
   --surface: #ffffff;
-  --surface-hover: #f0f0f0;
+  --surface-hover: #f5f5f5;
   --border: #e5e5ea;
   --border-light: #f0f0f0;
   --text: #1a1a1a;
-  --text-secondary: #666666;
-  --text-muted: #999999;
-  --accent: #007aff;
-  --accent-light: #e8f4ff;
+  --text-secondary: #636366;
+  --text-muted: #a1a1a6;
+  --accent: #0071e3;
+  --accent-light: #e8f2fd;
   --danger: #ff3b30;
-  --success: #34c759;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.12);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 :root[data-theme='dark'] {
@@ -35,16 +34,15 @@
   --surface-hover: #2c2c2e;
   --border: #38383a;
   --border-light: #2c2c2e;
-  --text: #ffffff;
-  --text-secondary: #8e8e93;
+  --text: #f5f5f7;
+  --text-secondary: #98989d;
   --text-muted: #636366;
   --accent: #0a84ff;
-  --accent-light: #1a3a5c;
+  --accent-light: #1a2a3a;
   --danger: #ff453a;
-  --success: #30d158;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -70,27 +68,27 @@ body {
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-  padding: 8px 12px 96px;
+  padding: 12px 16px 100px;
 }
 
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 0;
-  margin-bottom: 8px;
+  padding: 16px 0;
+  margin-bottom: 12px;
 }
 
 .topbar-left h1 {
   font-size: var(--font-title);
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.3px;
 }
 
 .topbar-left p {
   font-size: var(--font-small);
-  margin: 2px 0 0;
+  margin: 4px 0 0;
   color: var(--text-muted);
 }
 
@@ -101,17 +99,17 @@ body {
 }
 
 .theme-toggle {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border: none;
   border-radius: 50%;
   background: var(--surface);
   color: var(--text-secondary);
-  font-size: 18px;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow);
   transition: all 200ms var(--ease);
 }
 
@@ -128,17 +126,17 @@ body {
   display: flex;
   background: var(--surface);
   border-top: 1px solid var(--border-light);
-  padding: 8px 4px;
-  padding-bottom: max(8px, env(safe-area-inset-bottom));
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+  padding: 6px 8px;
+  padding-bottom: max(6px, env(safe-area-inset-bottom));
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
 }
 
 .tab-btn {
   flex: 1;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   min-height: var(--control-height);
-  padding: 8px 4px;
+  padding: 6px 4px;
   background: transparent;
   color: var(--text-muted);
   font-weight: 500;
@@ -146,7 +144,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   transition: all 200ms var(--ease);
 }
 
@@ -161,7 +159,7 @@ body {
 }
 
 .tab-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
 .content {
@@ -185,10 +183,10 @@ body {
   height: var(--control-height-sm);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 0 12px;
+  padding: 0 14px;
   background: var(--surface);
   color: var(--text);
-  font-size: 15px;
+  font-size: 16px;
   transition: border-color 200ms var(--ease);
 }
 
@@ -203,12 +201,12 @@ body {
 
 .filter-bar button {
   height: var(--control-height-sm);
-  padding: 0 14px;
+  padding: 0 16px;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -219,8 +217,9 @@ body {
 
 .filter-bar small {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 14px;
   padding-left: 4px;
+  line-height: var(--control-height-sm);
 }
 
 .view-stage {
@@ -230,7 +229,7 @@ body {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -238,22 +237,22 @@ body {
   }
 }
 
-@keyframes slideIn {
+@keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
 
 .panel {
   background: var(--surface);
   border-radius: 16px;
-  padding: 16px;
-  box-shadow: var(--shadow-sm);
+  padding: 18px;
+  box-shadow: var(--shadow);
   transition: background 200ms var(--ease);
 }
 
@@ -263,14 +262,14 @@ body {
 
 .panel h2 {
   margin: 0;
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--text);
 }
 
 .panel h3 {
   margin: 0;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text);
 }
@@ -278,20 +277,20 @@ body {
 .muted {
   color: var(--text-muted);
   margin-top: 6px;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .list {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 12px;
+  margin-top: 14px;
 }
 
 .card {
   background: var(--bg);
   border-radius: 12px;
-  padding: 14px;
+  padding: 14px 16px;
   transition: all 200ms var(--ease);
 }
 
@@ -311,11 +310,11 @@ body {
   font-size: 16px;
   font-weight: 600;
   color: var(--text);
-  line-height: 1.3;
+  line-height: 1.4;
 }
 
 .card header span {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--accent);
   font-weight: 500;
   white-space: nowrap;
@@ -323,28 +322,28 @@ body {
 
 .card p {
   margin: 6px 0 0;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-secondary);
 }
 
 .card small {
   display: block;
   margin-top: 4px;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-muted);
 }
 
 .empty {
   text-align: center;
-  padding: 32px 16px;
+  padding: 40px 20px;
   color: var(--text-muted);
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .empty-icon {
   font-size: 48px;
   margin-bottom: 12px;
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .schedule-header,
@@ -357,7 +356,7 @@ body {
 
 .schedule-header h2,
 .calendar-header h2 {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 600;
 }
 
@@ -370,7 +369,7 @@ body {
 
 .schedule-actions button,
 .calendar-actions button {
-  height: 36px;
+  height: 34px;
   padding: 0 12px;
   border: none;
   border-radius: 8px;
@@ -396,20 +395,39 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.schedule-week-nav button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.schedule-week-nav button:active {
+  background: var(--accent-light);
+  transform: scale(0.95);
 }
 
 .schedule-week-nav span {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   color: var(--text);
-  min-width: 100px;
+  min-width: 120px;
   text-align: center;
 }
 
 .week-grid {
-  margin-top: 12px;
+  margin-top: 14px;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
@@ -419,7 +437,7 @@ body {
   background: var(--bg);
   border-radius: 10px;
   padding: 8px 4px;
-  min-height: 80px;
+  min-height: 90px;
 }
 
 .day-col h3 {
@@ -480,7 +498,7 @@ body {
 }
 
 .month-grid {
-  margin-top: 12px;
+  margin-top: 14px;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
@@ -490,13 +508,13 @@ body {
   text-align: center;
   color: var(--text-muted);
   font-size: 12px;
-  font-weight: 500;
-  padding: 8px 0;
+  font-weight: 600;
+  padding: 10px 0;
 }
 
 .day-cell {
   aspect-ratio: 1;
-  min-height: 44px;
+  min-height: 46px;
   border: none;
   border-radius: 10px;
   background: transparent;
@@ -506,7 +524,7 @@ body {
   justify-content: center;
   gap: 2px;
   color: var(--text);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   transition: all 200ms var(--ease);
   position: relative;
@@ -549,7 +567,7 @@ body {
 }
 
 .day-cell.today small {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .day-cell.selected small {
@@ -557,14 +575,14 @@ body {
 }
 
 .date-list {
-  margin-top: 16px;
-  padding-top: 16px;
+  margin-top: 18px;
+  padding-top: 18px;
   border-top: 1px solid var(--border-light);
 }
 
 .date-list h3 {
   margin-bottom: 12px;
-  font-size: 15px;
+  font-size: 16px;
   color: var(--text-secondary);
 }
 
@@ -583,27 +601,16 @@ body {
   position: fixed;
   left: 16px;
   right: 16px;
-  bottom: 88px;
+  bottom: 90px;
   z-index: 200;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 14px 18px;
   border-radius: 14px;
   background: var(--surface);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
   animation: slideUp 300ms var(--ease-bounce);
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .undo-toast span {
@@ -629,7 +636,7 @@ body {
 .modal-mask {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -653,7 +660,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .modal-header h3 {
@@ -677,7 +684,7 @@ body {
 .modal-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .modal-form label {
@@ -693,7 +700,7 @@ body {
 .modal-form textarea {
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 12px;
+  padding: 12px 14px;
   background: var(--bg);
   color: var(--text);
   font-size: 16px;
@@ -707,13 +714,13 @@ body {
 }
 
 .modal-form textarea {
-  min-height: 100px;
+  min-height: 80px;
   resize: vertical;
 }
 
 .color-picker {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -785,6 +792,7 @@ button.danger {
   position: relative;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   background: var(--accent);
   color: white;
@@ -794,6 +802,12 @@ button.danger {
   font-size: 16px;
   font-weight: 600;
   margin-top: 12px;
+  transition: all 200ms var(--ease);
+}
+
+.file-picker:active {
+  transform: scale(0.98);
+  opacity: 0.9;
 }
 
 .file-picker input {
@@ -803,46 +817,40 @@ button.danger {
   cursor: pointer;
 }
 
-.file-picker:hover {
-  opacity: 0.9;
-}
-
 .push-panel {
   background: var(--bg);
   border-radius: 12px;
-  padding: 14px;
-  margin-top: 12px;
+  padding: 16px;
+  margin-top: 14px;
 }
 
 .push-panel h3 {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .push-status {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-secondary);
-  margin-bottom: 12px;
-}
-
-.push-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  margin-bottom: 14px;
 }
 
 .push-buttons button {
-  flex: 1;
-  min-width: 100px;
   height: var(--control-height-sm);
   border: none;
   border-radius: 10px;
   background: var(--surface);
   color: var(--text);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   box-shadow: var(--shadow-sm);
+  transition: all 200ms var(--ease);
+}
+
+.push-buttons button:active {
+  transform: scale(0.97);
+  opacity: 0.9;
 }
 
 .push-buttons button.primary {
@@ -853,56 +861,6 @@ button.danger {
 .push-buttons button.danger {
   background: var(--danger);
   color: white;
-  width: auto;
-  flex: none;
-}
-
-.push-log-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 12px;
-}
-
-.push-log-header h4 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.push-log-list {
-  margin-top: 8px;
-  max-height: 200px;
-  overflow: auto;
-}
-
-.log-item {
-  padding: 8px 10px;
-  border-radius: 8px;
-  background: var(--surface);
-  margin-bottom: 6px;
-  font-size: 13px;
-}
-
-.log-item-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-
-.log-item-title {
-  font-weight: 500;
-  color: var(--text);
-}
-
-.log-item-time {
-  color: var(--text-muted);
-  font-size: 12px;
-}
-
-.log-item-result {
-  color: var(--text-secondary);
 }
 
 .date-jump {
@@ -912,7 +870,7 @@ button.danger {
 }
 
 .date-jump input {
-  height: 36px;
+  height: 34px;
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0 10px;
@@ -923,16 +881,16 @@ button.danger {
 
 @media (min-width: 768px) {
   .app-shell {
-    padding: 16px 24px 100px;
+    padding: 20px 24px 100px;
   }
 
   .panel {
     border-radius: 20px;
-    padding: 20px;
+    padding: 22px;
   }
 
   .week-grid {
-    gap: 8px;
+    gap: 6px;
   }
 
   .day-col {
@@ -940,27 +898,23 @@ button.danger {
     min-height: 100px;
   }
 
-  .event-block strong {
-    font-size: 12px;
-  }
-
   .month-grid {
     gap: 6px;
   }
 
   .day-cell {
-    min-height: 60px;
+    min-height: 56px;
     border-radius: 12px;
   }
 }
 
 @media (max-width: 380px) {
   :root {
-    --font-base: 15px;
+    --font-base: 16px;
   }
 
   .app-shell {
-    padding: 6px 8px 92px;
+    padding: 8px 12px 96px;
   }
 
   .topbar-left h1 {
@@ -969,7 +923,7 @@ button.danger {
 
   .tab-btn {
     font-size: 10px;
-    padding: 6px 2px;
+    padding: 4px 2px;
   }
 
   .tab-btn .icon {
@@ -978,7 +932,7 @@ button.danger {
 
   .day-col {
     padding: 6px 2px;
-    min-height: 70px;
+    min-height: 75px;
   }
 
   .event-block {

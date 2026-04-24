@@ -33,18 +33,17 @@ export function HomeView({ events }: HomeViewProps) {
             background: 'var(--accent)',
             color: 'white',
             borderRadius: '12px',
-            padding: '8px 16px',
+            padding: '10px 18px',
             textAlign: 'center',
           }}
         >
-          <div style={{ fontSize: '24px', fontWeight: 700, lineHeight: 1 }}>{todayEvents.length}</div>
-          <div style={{ fontSize: '11px', opacity: 0.9 }}>节课</div>
+          <div style={{ fontSize: '26px', fontWeight: 700, lineHeight: 1 }}>{todayEvents.length}</div>
+          <div style={{ fontSize: '11px', opacity: 0.85 }}>节课</div>
         </div>
       </div>
 
       {todayEvents.length === 0 ? (
         <div className="empty">
-          <div className="empty-icon">📚</div>
           <div>今天没有课程安排</div>
           <p className="muted" style={{ marginTop: '8px' }}>
             本周共 {weekEvents.length} 节课
@@ -58,7 +57,7 @@ export function HomeView({ events }: HomeViewProps) {
                 <strong>{event.title}</strong>
                 <span>{formatTimeRange(event)}</span>
               </header>
-              {event.location ? <p>📍 {event.location}</p> : null}
+              {event.location ? <p>{event.location}</p> : null}
               {event.note ? <small>{event.note}</small> : null}
             </article>
           ))}

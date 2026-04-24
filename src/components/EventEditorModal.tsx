@@ -81,7 +81,7 @@ export function EventEditorModal({ event, onClose, onSave, onDelete }: EventEdit
           </div>
 
           <label>
-            📍 地点
+            地点
             <input
               value={draft.location || ''}
               onChange={(e) => setDraft((prev) => ({ ...prev, location: e.target.value }))}
@@ -90,7 +90,7 @@ export function EventEditorModal({ event, onClose, onSave, onDelete }: EventEdit
           </label>
 
           <label>
-            📝 备注
+            备注
             <textarea
               value={draft.note || ''}
               onChange={(e) => setDraft((prev) => ({ ...prev, note: e.target.value }))}
