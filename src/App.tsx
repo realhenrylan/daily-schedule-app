@@ -13,7 +13,7 @@ import { addImportRecord, clearEvents, clearImportRecords, getAllEvents, getImpo
 import { exportBackupJson, importBackupJson } from './lib/backup'
 import { sortByStart } from './lib/date'
 import { disablePushForDevice, enablePushForDevice, getDispatchLogs, getOrCreateDeviceId, getPushSubscribed, sendTestPush, syncDeviceReminders, type PushDispatchLog } from './lib/push'
-import type { AppTab, CourseEvent, ImportRecord, Semester } from './types'
+import type { AppTab, CourseEvent, ImportRecord } from './types'
 
 type ThemeMode = 'light' | 'dark'
 
@@ -283,7 +283,7 @@ function extractSemesterFromFileName(fileName: string): string | null {
   }
 
   function handleExportBackup() {
-    exportBackupJson(events, records, semesters, activeSemesterId)
+    exportBackupJson(events, records)
   }
 
   async function handleImportBackup(file: File) {
@@ -476,8 +476,6 @@ function extractSemesterFromFileName(fileName: string): string | null {
           <div className="view-stage">
             <SettingsView
               records={records}
-              semesters={semesters}
-              activeSemesterId={activeSemesterId}
               pushEnabled={pushEnabled}
               pushStatusText={pushStatusText}
               reminderMinutes={reminderMinutes}

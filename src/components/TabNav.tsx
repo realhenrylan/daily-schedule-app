@@ -1,4 +1,5 @@
 import type { AppTab } from '../types'
+import type { JSX } from 'react'
 
 function HomeIcon() {
   return (
