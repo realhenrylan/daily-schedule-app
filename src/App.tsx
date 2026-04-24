@@ -108,7 +108,10 @@ function App() {
     for (const sem of semesters) {
       const start = dayjs(sem.startDate)
       const end = dayjs(sem.endDate)
-      if (now.isAfter(start.subtract(1, 'day') && now.isBefore(end.add(1, 'day')) {
+      const nowTs = now.valueOf()
+      const startTs = start.valueOf()
+      const endTs = end.valueOf()
+      if (nowTs > startTs - 86400000 && nowTs < endTs + 86400000) {
         return sem
       }
     }
@@ -123,8 +126,10 @@ function App() {
       const sem = semesters.find(s => {
         const start = dayjs(s.startDate)
         const end = dayjs(s.endDate)
-        const eventStart = dayjs(event.start)
-        return eventStart.isAfter(start.subtract(1, 'day') && eventStart.isBefore(end.add(1, 'day'))
+        const eventTs = dayjs(event.start).valueOf()
+        const startTs = start.valueOf()
+        const endTs = end.valueOf()
+        return eventTs > startTs - 86400000 && eventTs < endTs + 86400000
       })
       return !!sem
     })
