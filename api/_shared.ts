@@ -5,13 +5,33 @@ const publicKey = process.env.VAPID_PUBLIC_KEY
 const privateKey = process.env.VAPID_PRIVATE_KEY
 const subject = process.env.VAPID_SUBJECT || 'mailto:admin@example.com'
 
-if (publicKey && privateKey) {
-  webpush.setVapidDetails(subject, publicKey, privateKey)
+let vapidReady = false
+let vapidInitError: string | null = null
+
+function initVapid(): boolean {
+  if (vapidReady) {
+    return true
+  }
+
+  if (!publicKey || !privateKey) {
+    vapidInitError = 'Missing VAPID_PUBLIC_KEY or VAPID_PRIVATE_KEY'
+    return false
+  }
+
+  try {
+    webpush.setVapidDetails(subject, publicKey, privateKey)
+    vapidReady = true
+    vapidInitError = null
+    return true
+  } catch (error) {
+    vapidInitError = error instanceof Error ? error.message : 'Unknown VAPID init error'
+    return false
+  }
 }
 
 export function ensureVapidConfigured(res: VercelResponse): boolean {
-  if (!publicKey || !privateKey) {
-    res.status(500).json({ error: 'Missing VAPID configuration' })
+  if (!initVapid()) {
+    res.status(500).json({ error: `Invalid VAPID configuration: ${vapidInitError}` })
     return false
   }
   return true

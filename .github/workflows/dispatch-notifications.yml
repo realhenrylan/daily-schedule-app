@@ -19,12 +19,15 @@ jobs:
             exit 1
           fi
 
-          HTTP_CODE=$(curl -sS -o response.json -w "%{http_code}" -X POST "$DISPATCH_URL" \
+          echo "DISPATCH_URL=$DISPATCH_URL"
+          HTTP_CODE=$(curl -sS -D response.headers -o response.json -w "%{http_code}" -X POST "$DISPATCH_URL" \
             -H "Authorization: Bearer $CRON_SECRET" \
             -H "Content-Type: application/json" \
             --data '{}')
 
           echo "HTTP_CODE=$HTTP_CODE"
+          echo "Response headers:"
+          cat response.headers
           echo "Response body:"
           cat response.json
 
