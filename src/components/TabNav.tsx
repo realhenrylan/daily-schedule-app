@@ -1,3 +1,5 @@
+import type { AppTab } from '../types'
+
 const TAB_ICONS: Record<string, string> = {
   home: '🏠',
   schedule: '📅',
@@ -7,7 +9,7 @@ const TAB_ICONS: Record<string, string> = {
   ops: '🔧',
 }
 
-const defaultTabs: { id: 'home' | 'schedule' | 'calendar' | 'import' | 'settings'; label: string }[] = [
+const defaultTabs: { id: AppTab; label: string }[] = [
   { id: 'home', label: '首页' },
   { id: 'schedule', label: '课表' },
   { id: 'calendar', label: '日历' },
@@ -16,9 +18,9 @@ const defaultTabs: { id: 'home' | 'schedule' | 'calendar' | 'import' | 'settings
 ]
 
 interface TabNavProps {
-  activeTab: string
-  onChange: (tab: string) => void
-  tabs?: { id: string; label: string }[]
+  activeTab: AppTab
+  onChange: (tab: AppTab) => void
+  tabs?: { id: AppTab; label: string }[]
 }
 
 export function TabNav({ activeTab, onChange, tabs = defaultTabs }: TabNavProps) {
