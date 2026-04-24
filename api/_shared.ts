@@ -1,4 +1,4 @@
-import webpush from 'web-push'
+import * as webpush from 'web-push'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 const publicKey = process.env.VAPID_PUBLIC_KEY
