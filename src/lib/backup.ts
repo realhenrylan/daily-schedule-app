@@ -38,9 +38,13 @@ function isImportRecordArray(value: unknown): value is ImportRecord[] {
 
 export async function importBackupJson(file: File): Promise<{ events: CourseEvent[]; records: ImportRecord[] }> {
   const text = await readFileAsText(file)
-  const data = JSON.parse(text) as Partial<BackupPayload>
+  const data = JSON.parse(text) as { version?: number; events?: unknown; records?: unknown }
 
-  if (!data || (data.version !== 1 && data.version !== 2)) {
+  if (!data || typeof data.version !== 'number') {
+    throw new Error('备份文件版本不支持')
+  }
+
+  if (data.version !== 1 && data.version !== 2) {
     throw new Error('备份文件版本不支持')
   }
 
