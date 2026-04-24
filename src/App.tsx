@@ -11,7 +11,7 @@ import { TabNav } from './components/TabNav'
 import { addImportRecord, clearEvents, clearImportRecords, getAllEvents, getImportRecords, replaceEvents, replaceImportRecords, saveEvents } from './lib/db'
 import { exportBackupJson, importBackupJson } from './lib/backup'
 import { sortByStart } from './lib/date'
-import { disablePushForDevice, enablePushForDevice, getOrCreateDeviceId, getPushSubscribed, sendTestPush, syncDeviceReminders } from './lib/push'
+import { disablePushForDevice, enablePushForDevice, getDispatchLogs, getOrCreateDeviceId, getPushSubscribed, sendTestPush, syncDeviceReminders, type PushDispatchLog } from './lib/push'
 import type { AppTab, CourseEvent, ImportRecord } from './types'
 
 type ThemeMode = 'light' | 'dark'
@@ -36,6 +36,8 @@ function App() {
   const [transitionDirection, setTransitionDirection] = useState<TransitionDirection>('forward')
   const [pushEnabled, setPushEnabled] = useState(false)
   const [pushStatusText, setPushStatusText] = useState('推送未开启')
+  const [pushLogs, setPushLogs] = useState<PushDispatchLog[]>([])
+  const [pushLogsLoading, setPushLogsLoading] = useState(false)
   const deleteTimerRef = useRef<number | null>(null)
   const eventsRef = useRef<CourseEvent[]>([])
   const [theme, setTheme] = useState<ThemeMode>(() => {
@@ -92,6 +94,25 @@ function App() {
 
     void checkPush()
   }, [])
+
+  async function handleRefreshPushLogs() {
+    setPushLogsLoading(true)
+    try {
+      const logs = await getDispatchLogs(30)
+      setPushLogs(logs)
+    } catch {
+      // keep existing logs on failure
+    } finally {
+      setPushLogsLoading(false)
+    }
+  }
+
+  function handleTabChange(tab: AppTab) {
+    setActiveTab(tab)
+    if (tab === 'settings') {
+      void handleRefreshPushLogs()
+    }
+  }
 
   const eventsByStartKey = useMemo(() => {
     return new Set(events.map((event) => `${event.uid || event.title}|${event.start}`))
@@ -215,6 +236,7 @@ function App() {
       )
       setPushEnabled(true)
       setPushStatusText('推送已开启，默认课前 30 分钟提醒')
+      await handleRefreshPushLogs()
     } catch (error) {
       const message = error instanceof Error ? error.message : '开启推送失败'
       setPushStatusText(`开启失败：${message}`)
@@ -241,6 +263,7 @@ function App() {
         30,
       )
       setPushStatusText('已同步提醒计划')
+      await handleRefreshPushLogs()
     } catch {
       setPushStatusText('同步提醒失败')
     }
@@ -251,6 +274,7 @@ function App() {
       const deviceId = getOrCreateDeviceId()
       await sendTestPush(deviceId)
       setPushStatusText('测试通知已发送')
+      await handleRefreshPushLogs()
     } catch (error) {
       const message = error instanceof Error ? error.message : '测试通知发送失败'
       setPushStatusText(`测试通知发送失败：${message}`)
@@ -280,7 +304,7 @@ function App() {
         </div>
       </header>
 
-      <TabNav activeTab={activeTab} onChange={setActiveTab} />
+      <TabNav activeTab={activeTab} onChange={handleTabChange} />
 
       <main className="content" data-transition-direction={transitionDirection}>
         <section className="panel filter-bar view-stage" aria-label="搜索与筛选">
@@ -317,10 +341,13 @@ function App() {
               records={records}
               pushEnabled={pushEnabled}
               pushStatusText={pushStatusText}
+              pushLogs={pushLogs}
+              pushLogsLoading={pushLogsLoading}
               onEnablePush={handleEnablePush}
               onDisablePush={handleDisablePush}
               onSyncPush={handleSyncPush}
               onTestPush={handleTestPush}
+              onRefreshPushLogs={handleRefreshPushLogs}
               onClearAll={handleClearAll}
               onExportBackup={handleExportBackup}
               onImportBackup={handleImportBackup}

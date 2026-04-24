@@ -3,6 +3,7 @@ const SUBSCRIBE_ENDPOINT = '/api/push/subscribe'
 const UNSUBSCRIBE_ENDPOINT = '/api/push/unsubscribe'
 const SYNC_ENDPOINT = '/api/push/sync'
 const TEST_ENDPOINT = '/api/push/test'
+const LOGS_ENDPOINT = '/api/push/logs'
 const DEVICE_ID_STORAGE_KEY = 'schedule-device-id'
 
 async function readApiError(response: Response, fallback: string): Promise<Error> {
@@ -21,6 +22,16 @@ export interface ReminderEventInput {
   id: string
   title: string
   start: string
+}
+
+export interface PushDispatchLog {
+  id: string
+  at: string
+  level: 'info' | 'warn' | 'error'
+  title: string
+  result: string
+  detail?: string
+  retryCount?: number
 }
 
 function urlBase64ToUint8Array(base64String: string) {
@@ -128,6 +139,15 @@ export async function sendTestPush(deviceId: string): Promise<void> {
   if (!res.ok) {
     throw await readApiError(res, '测试推送发送失败')
   }
+}
+
+export async function getDispatchLogs(limit = 30): Promise<PushDispatchLog[]> {
+  const res = await fetch(`${LOGS_ENDPOINT}?limit=${Math.max(1, Math.min(100, limit))}`)
+  if (!res.ok) {
+    throw await readApiError(res, '获取推送日志失败')
+  }
+  const data = (await res.json()) as { logs?: PushDispatchLog[] }
+  return Array.isArray(data.logs) ? data.logs : []
 }
 
 export async function getPushSubscribed(): Promise<boolean> {

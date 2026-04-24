@@ -1,13 +1,17 @@
 import type { ImportRecord } from '../types'
+import type { PushDispatchLog } from '../lib/push'
 
 interface SettingsViewProps {
   records: ImportRecord[]
   pushEnabled: boolean
   pushStatusText: string
+  pushLogs: PushDispatchLog[]
+  pushLogsLoading: boolean
   onEnablePush: () => Promise<void>
   onDisablePush: () => Promise<void>
   onSyncPush: () => Promise<void>
   onTestPush: () => Promise<void>
+  onRefreshPushLogs: () => Promise<void>
   onClearAll: () => Promise<void>
   onExportBackup: () => void
   onImportBackup: (file: File) => Promise<void>
@@ -17,10 +21,13 @@ export function SettingsView({
   records,
   pushEnabled,
   pushStatusText,
+  pushLogs,
+  pushLogsLoading,
   onEnablePush,
   onDisablePush,
   onSyncPush,
   onTestPush,
+  onRefreshPushLogs,
   onClearAll,
   onExportBackup,
   onImportBackup,
@@ -50,6 +57,32 @@ export function SettingsView({
             发送测试通知
           </button>
         </div>
+
+        <div className="push-log-header">
+          <h4>最近派发日志</h4>
+          <button type="button" onClick={() => void onRefreshPushLogs()}>
+            刷新日志
+          </button>
+        </div>
+        {pushLogsLoading ? <p className="muted">日志加载中...</p> : null}
+        {!pushLogsLoading && pushLogs.length === 0 ? <p className="muted">暂无日志</p> : null}
+        {pushLogs.length > 0 ? (
+          <div className="list push-log-list">
+            {pushLogs.map((log) => (
+              <article className="card" key={log.id}>
+                <header>
+                  <strong>{log.title || '系统'}</strong>
+                  <span>{new Date(log.at).toLocaleString()}</span>
+                </header>
+                <small>
+                  [{log.level}] {log.result}
+                  {typeof log.retryCount === 'number' ? ` · 重试 ${log.retryCount} 次` : ''}
+                </small>
+                {log.detail ? <p>{log.detail}</p> : null}
+              </article>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       <div className="schedule-actions schedule-actions-secondary">

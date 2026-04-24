@@ -44,10 +44,25 @@ export type ReminderRecord = {
   notifyAt: string
   leadMinutes: number
   sent: boolean
+  retryCount?: number
+  nextRetryAt?: string
+  failed?: boolean
+  lastError?: string
+}
+
+export type DispatchLog = {
+  id: string
+  at: string
+  level: 'info' | 'warn' | 'error'
+  title: string
+  result: string
+  detail?: string
+  retryCount?: number
 }
 
 const SUBS_KEY = 'schedule:push:subscriptions'
 const REMINDERS_KEY = 'schedule:push:reminders'
+const DISPATCH_LOGS_KEY = 'schedule:push:dispatch-logs'
 
 export async function getSubscriptions(): Promise<Record<string, SubscriptionRecord>> {
   const raw = await redisRequest<string | null>(['get', SUBS_KEY])
@@ -75,6 +90,23 @@ export async function getReminders(): Promise<ReminderRecord[]> {
 
 export async function setReminders(data: ReminderRecord[]): Promise<void> {
   await redisRequest(['set', REMINDERS_KEY, JSON.stringify(data)])
+}
+
+export async function getDispatchLogs(limit = 50): Promise<DispatchLog[]> {
+  const raw = await redisRequest<string | null>(['get', DISPATCH_LOGS_KEY])
+  if (!raw) return []
+  try {
+    const logs = JSON.parse(raw) as DispatchLog[]
+    return logs.slice(0, Math.max(1, Math.min(200, limit)))
+  } catch {
+    return []
+  }
+}
+
+export async function prependDispatchLog(log: DispatchLog, max = 200): Promise<void> {
+  const logs = await getDispatchLogs(max)
+  const next = [log, ...logs].slice(0, Math.max(10, Math.min(500, max)))
+  await redisRequest(['set', DISPATCH_LOGS_KEY, JSON.stringify(next)])
 }
 
 export async function withRedisGuard(res: VercelResponse, fn: () => Promise<void>) {
