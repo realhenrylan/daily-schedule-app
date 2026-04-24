@@ -257,7 +257,7 @@ function App() {
     let semesterEnd: string | undefined
     if (semesterName) {
       const allCourseDates = [...events, ...deduped]
-        .filter((evt) => extractSemesterFromFileName(sourceName) === semesterName)
+        .filter(() => extractSemesterFromFileName(sourceName) === semesterName)
         .map((evt) => dayjs(evt.start))
         .filter((d) => d.isValid())
 
