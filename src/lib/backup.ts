@@ -1,12 +1,14 @@
 import { readFileAsText } from '../utils/file'
-import type { BackupPayload, CourseEvent, ImportRecord } from '../types'
+import type { BackupPayload, CourseEvent, ImportRecord, Semester } from '../types'
 
-export function exportBackupJson(events: CourseEvent[], records: ImportRecord[]): void {
+export function exportBackupJson(events: CourseEvent[], records: ImportRecord[], semesters: Semester[] = [], activeSemesterId: string | null = null): void {
   const payload: BackupPayload = {
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     events,
     records,
+    semesters,
+    activeSemesterId: activeSemesterId || undefined,
   }
 
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
@@ -38,7 +40,7 @@ export async function importBackupJson(file: File): Promise<{ events: CourseEven
   const text = await readFileAsText(file)
   const data = JSON.parse(text) as Partial<BackupPayload>
 
-  if (!data || data.version !== 1) {
+  if (!data || (data.version !== 1 && data.version !== 2)) {
     throw new Error('备份文件版本不支持')
   }
 

@@ -237,7 +237,7 @@ function App() {
   }
 
   function handleExportBackup() {
-    exportBackupJson(events, records)
+    exportBackupJson(events, records, semesters, activeSemesterId)
   }
 
   async function handleImportBackup(file: File) {
