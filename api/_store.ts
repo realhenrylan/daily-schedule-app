@@ -12,7 +12,9 @@ function ensureRedis(res: VercelResponse): boolean {
 }
 
 async function redisRequest<T>(command: string[]): Promise<T> {
-  const response = await fetch(`${REDIS_URL}/${command.join('/')}`, {
+  const encoded = command.map((part) => encodeURIComponent(part))
+  const base = REDIS_URL?.replace(/\/$/, '')
+  const response = await fetch(`${base}/${encoded.join('/')}`, {
     headers: {
       Authorization: `Bearer ${REDIS_TOKEN}`,
     },
