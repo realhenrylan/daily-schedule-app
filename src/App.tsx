@@ -196,10 +196,13 @@ function App() {
           (event.note || '').toLowerCase().includes(kw)
 
         const hitDate = !filterDate || dayjs(event.start).isSame(dayjs(filterDate), 'day')
-        return hitKeyword && hitDate
+
+        const hitSemester = !activeSemesterId || event.semesterId === activeSemesterId
+
+        return hitKeyword && hitDate && hitSemester
       }),
     )
-  }, [events, searchText, filterDate])
+  }, [events, searchText, filterDate, activeSemesterId])
 
   useEffect(() => {
     eventsRef.current = events
@@ -212,22 +215,64 @@ function App() {
       return
     }
 
-    const next = sortByStart([...events, ...deduped])
-    await saveEvents(deduped)
+    const semesterName = extractSemesterFromFileName(sourceName)
+    let currentSemesterId = activeSemesterId
+
+    if (semesterName) {
+      const existingSemester = semesters.find(s => s.name === semesterName)
+      if (existingSemester) {
+        currentSemesterId = existingSemester.id
+      } else {
+        const newSemester: Semester = {
+          id: crypto.randomUUID(),
+          name: semesterName,
+          startDate: new Date().toISOString(),
+          endDate: new Date().toISOString(),
+          isActive: false,
+        }
+        setSemesters(prev => [...prev, newSemester])
+        currentSemesterId = newSemester.id
+      }
+    }
+
+    const eventsWithSemester = deduped.map(event => ({
+      ...event,
+      semesterId: currentSemesterId || undefined,
+    }))
+
+    const next = sortByStart([...events, ...eventsWithSemester])
+    await saveEvents(eventsWithSemester)
 
     const record: ImportRecord = {
       id: crypto.randomUUID(),
       sourceName: sourceName || '未命名导入',
       importedAt: new Date().toISOString(),
       totalParsed: incoming.length,
-      inserted: deduped.length,
-      skippedAsDuplicate: incoming.length - deduped.length,
+      inserted: eventsWithSemester.length,
+      skippedAsDuplicate: incoming.length - eventsWithSemester.length,
+      semesterId: currentSemesterId || undefined,
     }
 
     await addImportRecord(record)
     setEvents(next)
     setRecords((prev) => [...prev, record])
     setActiveTab('schedule')
+  }
+
+  function extractSemesterFromFileName(fileName: string): string | null {
+    const patterns = [
+      /(\d{4}[年-]?\d{1,2}[学期季]?)/,
+      /(\d{4}-\d{4}[学年]?)/,
+      /(20\d{2})/,
+      /(秋|春|夏|冬)/,
+    ]
+    for (const pattern of patterns) {
+      const match = fileName.match(pattern)
+      if (match) {
+        return match[0]
+      }
+    }
+    return null
   }
 
   async function handleClearAll() {
@@ -403,7 +448,11 @@ function App() {
       <header className="topbar">
         <div className="topbar-left">
           <h1>课程日历</h1>
-          <p>{events.length} 节课 · {records.length} 次导入</p>
+          <p>
+            {semesters.find(s => s.id === activeSemesterId)?.name || '全部课程'}
+            {' · '}
+            {filteredEvents.length} 节课
+          </p>
         </div>
         <div className="topbar-right">
           <button
