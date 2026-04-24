@@ -43,6 +43,9 @@ function App() {
     const saved = localStorage.getItem('schedule-reminder-minutes')
     return saved ? Number.parseInt(saved, 10) : 30
   })
+
+  const [semesters, setSemesters] = useState<{name: string; startDate: string; endDate: string}[]>([])
+
   const showOps = useMemo(() => {
     if (typeof window === 'undefined') return false
     const fromQuery = new URLSearchParams(window.location.search).get('ops') === '1'
@@ -99,6 +102,38 @@ function App() {
   useEffect(() => {
     localStorage.setItem('schedule-reminder-minutes', String(reminderMinutes))
   }, [reminderMinutes])
+
+  const currentSemester = useMemo(() => {
+    const now = dayjs()
+    for (const sem of semesters) {
+      const start = dayjs(sem.startDate)
+      const end = dayjs(sem.endDate)
+      if (now.isAfter(start.subtract(1, 'day') && now.isBefore(end.add(1, 'day')) {
+        return sem
+      }
+    }
+    return null
+  }, [semesters])
+
+  const currentSemesterInfo = useMemo(() => {
+    if (!currentSemester) {
+      return { count: 0, uniqueCourses: 0 }
+    }
+    const semesterCourses = events.filter(event => {
+      const sem = semesters.find(s => {
+        const start = dayjs(s.startDate)
+        const end = dayjs(s.endDate)
+        const eventStart = dayjs(event.start)
+        return eventStart.isAfter(start.subtract(1, 'day')) && eventStart.isBefore(end.add(1, 'day'))
+      })
+      return !!sem
+    })
+    const uniqueTitles = new Set(semesterCourses.map(e => e.title))
+    return {
+      count: semesterCourses.length,
+      uniqueCourses: uniqueTitles.size,
+    }
+  }, [events, semesters, currentSemester])
 
   useEffect(() => {
     const prev = previousTabRef.current
@@ -212,6 +247,31 @@ function App() {
     }
 
     const semesterName = extractSemesterFromFileName(sourceName)
+
+    let semesterStart: string | undefined
+    let semesterEnd: string | undefined
+    if (semesterName) {
+      const allCourseDates = [...events, ...deduped]
+        .filter(e => extractSemesterFromFileName(sourceName) === semesterName)
+        .map(e => dayjs(e.start))
+        .filter(d => d.isValid())
+
+      if (allCourseDates.length > 0) {
+        semesterStart = allCourseDates.reduce((min, d) => d.isBefore(min) ? d : min).startOf('day').toISOString()
+        semesterEnd = allCourseDates.reduce((max, d) => d.isAfter(max) ? d : max).endOf('day').toISOString()
+      } else {
+        const newDates = deduped.map(e => dayjs(e.start)).filter(d => d.isValid())
+        if (newDates.length > 0) {
+          semesterStart = newDates.reduce((min, d) => d.isBefore(min) ? d : min).startOf('day').toISOString()
+          semesterEnd = newDates.reduce((max, d) => d.isAfter(max) ? d : max).endOf('day').add(4, 'month').toISOString()
+        }
+      }
+
+      const existingSemester = semesters.find(s => s.name === semesterName)
+      if (!existingSemester && semesterName && semesterStart && semesterEnd) {
+        setSemesters(prev => [...prev, { name: semesterName, startDate: semesterStart, endDate: semesterEnd }])
+      }
+    }
 
     const eventsWithSemester = deduped.map(event => ({
       ...event,
@@ -424,7 +484,13 @@ function extractSemesterFromFileName(fileName: string): string | null {
       <header className="topbar">
         <div className="topbar-left">
           <h1>课程日历</h1>
-          <p>{filteredEvents.length} 节课</p>
+          <p>
+            {currentSemester ? (
+              <>{currentSemester.name} · {currentSemesterInfo.count}节课 · {currentSemesterInfo.uniqueCourses}门课</>
+            ) : (
+              <>无学期 · 0节课</>
+            )}
+          </p>
         </div>
         <div className="topbar-right">
           <button

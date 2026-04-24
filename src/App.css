@@ -169,18 +169,6 @@ body {
   border-radius: 20px;
 }
 
-.tab-btn.active::after {
-  content: '';
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 24px;
-  height: 2.5px;
-  background: var(--accent);
-  border-radius: 2px;
-}
-
 .content {
   margin-top: 4px;
 }

@@ -10,6 +10,18 @@ interface CalendarViewProps {
 
 const WEEKDAY_LABELS = ['日', '一', '二', '三', '四', '五', '六']
 
+const COURSE_COLORS = [
+  '#4F46E5', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316'
+]
+
+function getCourseColor(title: string): string {
+  let hash = 0
+  for (let i = 0; i < title.length; i++) {
+    hash = title.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return COURSE_COLORS[Math.abs(hash) % COURSE_COLORS.length]
+}
+
 export function CalendarView({ events, onEditEvent }: CalendarViewProps) {
   const today = dayjs()
   const [monthCursor, setMonthCursor] = useState(today.startOf('month'))
@@ -89,27 +101,31 @@ export function CalendarView({ events, onEditEvent }: CalendarViewProps) {
             当天没有课程
           </div>
         ) : (
-          selectedEvents.map((event) => (
-            <article
-              key={event.id}
-              className="card"
-              onClick={() => onEditEvent(event)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  onEditEvent(event)
-                }
-              }}
-            >
-              <header>
-                <strong>{event.title}</strong>
-                <span>{formatTimeRange(event)}</span>
-              </header>
-              {event.location ? <p>{event.location}</p> : null}
-              {event.note ? <small>{event.note}</small> : null}
-            </article>
-          ))
+          selectedEvents.map((event) => {
+            const color = event.color || getCourseColor(event.title)
+            return (
+              <article
+                key={event.id}
+                className="card"
+                style={{ borderLeftColor: color }}
+                onClick={() => onEditEvent(event)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    onEditEvent(event)
+                  }
+                }}
+              >
+                <header>
+                  <strong style={{ color }}>{event.title}</strong>
+                  <span>{formatTimeRange(event)}</span>
+                </header>
+                {event.location ? <p>{event.location}</p> : null}
+                {event.note ? <small>{event.note}</small> : null}
+              </article>
+            )
+          })
         )}
       </section>
     </section>
