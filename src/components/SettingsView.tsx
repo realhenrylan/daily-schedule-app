@@ -1,10 +1,8 @@
 import { useState, type ReactNode } from 'react'
-import type { ImportRecord, Semester } from '../types'
+import type { ImportRecord } from '../types'
 
 interface SettingsViewProps {
   records: ImportRecord[]
-  semesters: Semester[]
-  activeSemesterId: string | null
   pushEnabled: boolean
   pushStatusText: string
   reminderMinutes: number
@@ -16,9 +14,6 @@ interface SettingsViewProps {
   onClearAll: () => Promise<void>
   onExportBackup: () => void
   onImportBackup: (file: File) => Promise<void>
-  onAddSemester: (name: string) => void
-  onSelectSemester: (id: string) => void
-  onDeleteSemester: (id: string) => void
 }
 
 const PRESET_OPTIONS = [
@@ -54,10 +49,9 @@ function CollapsibleSection({ title, defaultOpen = false, children }: Collapsibl
 }
 
 export function SettingsView(props: SettingsViewProps) {
-  const { records, semesters, activeSemesterId, pushEnabled, pushStatusText, reminderMinutes, onReminderMinutesChange, onEnablePush, onDisablePush, onSyncPush, onTestPush, onClearAll, onExportBackup, onImportBackup, onAddSemester, onSelectSemester, onDeleteSemester } = props
+  const { records, pushEnabled, pushStatusText, reminderMinutes, onReminderMinutesChange, onEnablePush, onDisablePush, onSyncPush, onTestPush, onClearAll, onExportBackup, onImportBackup } = props
 
   const [customMinutes, setCustomMinutes] = useState('')
-  const [newSemesterName, setNewSemesterName] = useState('')
   const isPreset = PRESET_OPTIONS.some(opt => opt.value === reminderMinutes)
   const isCustom = !isPreset && reminderMinutes > 0
 
@@ -79,48 +73,10 @@ export function SettingsView(props: SettingsViewProps) {
     }
   }
 
-  const handleAddSemester = () => {
-    if (newSemesterName.trim()) {
-      onAddSemester(newSemesterName.trim())
-      setNewSemesterName('')
-    }
-  }
-
   return (
     <div>
       <section className="panel">
         <h2>设置</h2>
-
-        <CollapsibleSection title="学期管理" defaultOpen>
-          <p className="muted">当前学期：{semesters.find(s => s.id === activeSemesterId)?.name || '未设置'}</p>
-          <div className="semester-list">
-            {semesters.length === 0 ? (
-              <div className="empty">暂无学期，请添加</div>
-            ) : (
-              semesters.map((semester) => (
-                <div key={semester.id} className={`semester-item ${semester.id === activeSemesterId ? 'active' : ''}`}>
-                  <span>{semester.name}</span>
-                  <div className="semester-actions">
-                    <button type="button" onClick={() => onSelectSemester(semester.id)}>
-                      {semester.id === activeSemesterId ? '使用中' : '切换'}
-                    </button>
-                    <button type="button" className="danger-text" onClick={() => onDeleteSemester(semester.id)}>删除</button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-          <div className="add-semester">
-            <input
-              type="text"
-              placeholder="输入学期名称，如：2024秋"
-              value={newSemesterName}
-              onChange={(e) => setNewSemesterName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddSemester()}
-            />
-            <button type="button" onClick={handleAddSemester}>添加</button>
-          </div>
-        </CollapsibleSection>
 
         <CollapsibleSection title="推送提醒" defaultOpen>
           <p className="push-status">{pushStatusText}</p>

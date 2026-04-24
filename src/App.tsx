@@ -43,8 +43,6 @@ function App() {
     const saved = localStorage.getItem('schedule-reminder-minutes')
     return saved ? Number.parseInt(saved, 10) : 30
   })
-  const [semesters, setSemesters] = useState<Semester[]>([])
-  const [activeSemesterId, setActiveSemesterId] = useState<string | null>(null)
   const showOps = useMemo(() => {
     if (typeof window === 'undefined') return false
     const fromQuery = new URLSearchParams(window.location.search).get('ops') === '1'
@@ -197,12 +195,10 @@ function App() {
 
         const hitDate = !filterDate || dayjs(event.start).isSame(dayjs(filterDate), 'day')
 
-        const hitSemester = !activeSemesterId || event.semesterId === activeSemesterId
-
-        return hitKeyword && hitDate && hitSemester
+        return hitKeyword && hitDate
       }),
     )
-  }, [events, searchText, filterDate, activeSemesterId])
+  }, [events, searchText, filterDate])
 
   useEffect(() => {
     eventsRef.current = events
@@ -216,28 +212,10 @@ function App() {
     }
 
     const semesterName = extractSemesterFromFileName(sourceName)
-    let currentSemesterId = activeSemesterId
-
-    if (semesterName) {
-      const existingSemester = semesters.find(s => s.name === semesterName)
-      if (existingSemester) {
-        currentSemesterId = existingSemester.id
-      } else {
-        const newSemester: Semester = {
-          id: crypto.randomUUID(),
-          name: semesterName,
-          startDate: new Date().toISOString(),
-          endDate: new Date().toISOString(),
-          isActive: false,
-        }
-        setSemesters(prev => [...prev, newSemester])
-        currentSemesterId = newSemester.id
-      }
-    }
 
     const eventsWithSemester = deduped.map(event => ({
       ...event,
-      semesterId: currentSemesterId || undefined,
+      semesterId: semesterName || undefined,
     }))
 
     const next = sortByStart([...events, ...eventsWithSemester])
@@ -250,7 +228,7 @@ function App() {
       totalParsed: incoming.length,
       inserted: eventsWithSemester.length,
       skippedAsDuplicate: incoming.length - eventsWithSemester.length,
-      semesterId: currentSemesterId || undefined,
+      semesterId: semesterName || undefined,
     }
 
     await addImportRecord(record)
@@ -335,31 +313,6 @@ function extractSemesterFromFileName(fileName: string): string | null {
       updatedAt: now.toISOString(),
     }
     setEditingEvent(newEvent)
-  }
-
-  function handleAddSemester(name: string) {
-    const newSemester: Semester = {
-      id: crypto.randomUUID(),
-      name,
-      startDate: new Date().toISOString(),
-      endDate: new Date().toISOString(),
-      isActive: false,
-    }
-    setSemesters((prev) => [...prev, newSemester])
-  }
-
-  function handleSelectSemester(id: string) {
-    setActiveSemesterId(id)
-    localStorage.setItem('schedule-active-semester', id)
-  }
-
-  function handleDeleteSemester(id: string) {
-    if (!window.confirm('确认删除该学期？该操作不会删除课程数据。')) return
-    setSemesters((prev) => prev.filter((s) => s.id !== id))
-    if (activeSemesterId === id) {
-      setActiveSemesterId(null)
-      localStorage.removeItem('schedule-active-semester')
-    }
   }
 
   async function handleSaveEditedEvent(updated: CourseEvent) {
@@ -471,11 +424,7 @@ function extractSemesterFromFileName(fileName: string): string | null {
       <header className="topbar">
         <div className="topbar-left">
           <h1>课程日历</h1>
-          <p>
-            {semesters.find(s => s.id === activeSemesterId)?.name || '全部课程'}
-            {' · '}
-            {filteredEvents.length} 节课
-          </p>
+          <p>{filteredEvents.length} 节课</p>
         </div>
         <div className="topbar-right">
           <button
@@ -540,9 +489,6 @@ function extractSemesterFromFileName(fileName: string): string | null {
               onClearAll={handleClearAll}
               onExportBackup={handleExportBackup}
               onImportBackup={handleImportBackup}
-              onAddSemester={handleAddSemester}
-              onSelectSemester={handleSelectSemester}
-              onDeleteSemester={handleDeleteSemester}
             />
           </div>
         ) : null}
