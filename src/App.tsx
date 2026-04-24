@@ -39,6 +39,10 @@ function App() {
   const [pushStatusText, setPushStatusText] = useState('推送未开启')
   const [pushLogs, setPushLogs] = useState<PushDispatchLog[]>([])
   const [pushLogsLoading, setPushLogsLoading] = useState(false)
+  const [reminderMinutes, setReminderMinutes] = useState<number>(() => {
+    const saved = localStorage.getItem('schedule-reminder-minutes')
+    return saved ? Number.parseInt(saved, 10) : 30
+  })
   const showOps = useMemo(() => {
     if (typeof window === 'undefined') return false
     const fromQuery = new URLSearchParams(window.location.search).get('ops') === '1'
@@ -91,6 +95,10 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('schedule-theme', theme)
   }, [theme])
+
+  useEffect(() => {
+    localStorage.setItem('schedule-reminder-minutes', String(reminderMinutes))
+  }, [reminderMinutes])
 
   useEffect(() => {
     const prev = previousTabRef.current
@@ -262,10 +270,10 @@ function App() {
       await syncDeviceReminders(
         deviceId,
         eventsRef.current.map((event) => ({ id: event.id, title: event.title, start: event.start })),
-        30,
+        reminderMinutes,
       )
       setPushEnabled(true)
-      setPushStatusText('推送已开启，默认课前 30 分钟提醒')
+      setPushStatusText(`推送已开启，课前 ${reminderMinutes} 分钟提醒`)
       await handleRefreshPushLogs()
     } catch (error) {
       const message = error instanceof Error ? error.message : '开启推送失败'
@@ -290,9 +298,9 @@ function App() {
       await syncDeviceReminders(
         deviceId,
         eventsRef.current.map((event) => ({ id: event.id, title: event.title, start: event.start })),
-        30,
+        reminderMinutes,
       )
-      setPushStatusText('已同步提醒计划')
+      setPushStatusText(`已同步提醒计划，课前 ${reminderMinutes} 分钟提醒`)
       await handleRefreshPushLogs()
     } catch {
       setPushStatusText('同步提醒失败')
@@ -370,6 +378,8 @@ function App() {
               records={records}
               pushEnabled={pushEnabled}
               pushStatusText={pushStatusText}
+              reminderMinutes={reminderMinutes}
+              onReminderMinutesChange={setReminderMinutes}
               onEnablePush={handleEnablePush}
               onDisablePush={handleDisablePush}
               onSyncPush={handleSyncPush}

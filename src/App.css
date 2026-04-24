@@ -892,6 +892,85 @@ button.danger {
   color: white;
 }
 
+.push-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.push-buttons-grid button {
+  height: var(--control-height-sm);
+  border: none;
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
+}
+
+.push-buttons-grid button:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+.backup-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.backup-btn {
+  width: 100%;
+  height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.reminder-setting {
+  margin-bottom: 14px;
+}
+
+.reminder-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.reminder-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reminder-option {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 200ms var(--ease);
+}
+
+.reminder-option:active {
+  transform: scale(0.97);
+}
+
+.reminder-option.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
 .date-jump {
   display: flex;
   align-items: center;
