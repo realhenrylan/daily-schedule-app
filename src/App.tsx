@@ -118,28 +118,6 @@ function App() {
     return null
   }, [semesters])
 
-  const currentSemesterInfo = useMemo(() => {
-    if (!currentSemester) {
-      return { count: 0, uniqueCourses: 0 }
-    }
-    const semesterCourses = events.filter(event => {
-      const sem = semesters.find(s => {
-        const start = dayjs(s.startDate)
-        const end = dayjs(s.endDate)
-        const eventTs = dayjs(event.start).valueOf()
-        const startTs = start.valueOf()
-        const endTs = end.valueOf()
-        return eventTs > startTs - 86400000 && eventTs < endTs + 86400000
-      })
-      return !!sem
-    })
-    const uniqueTitles = new Set(semesterCourses.map(e => e.title))
-    return {
-      count: semesterCourses.length,
-      uniqueCourses: uniqueTitles.size,
-    }
-  }, [events, semesters, currentSemester])
-
   useEffect(() => {
     const prev = previousTabRef.current
     const prevIndex = TAB_ORDER.indexOf(prev)
