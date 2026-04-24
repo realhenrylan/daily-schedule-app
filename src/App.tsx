@@ -259,19 +259,42 @@ function App() {
     setActiveTab('schedule')
   }
 
-  function extractSemesterFromFileName(fileName: string): string | null {
-    const patterns = [
+function extractSemesterFromFileName(fileName: string): string | null {
+    const lowerFileName = fileName.toLowerCase()
+
+    const yearMatch = lowerFileName.match(/(20\d{2})/g)
+    let year = ''
+    if (yearMatch && yearMatch.length > 0) {
+      year = yearMatch[0]
+    }
+
+    let season = ''
+    if (lowerFileName.includes('summer') || lowerFileName.includes('夏季')) {
+      season = '夏'
+    } else if (lowerFileName.includes('spring') || lowerFileName.includes('春季')) {
+      season = '春'
+    } else if (lowerFileName.includes('fall') || lowerFileName.includes('autumn') || lowerFileName.includes('秋季')) {
+      season = '秋'
+    } else if (lowerFileName.includes('winter') || lowerFileName.includes('冬季')) {
+      season = '冬'
+    }
+
+    if (year || season) {
+      return `${year}${season}`
+    }
+
+    const chinesePatterns = [
       /(\d{4}[年-]?\d{1,2}[学期季]?)/,
       /(\d{4}-\d{4}[学年]?)/,
-      /(20\d{2})/,
       /(秋|春|夏|冬)/,
     ]
-    for (const pattern of patterns) {
+    for (const pattern of chinesePatterns) {
       const match = fileName.match(pattern)
       if (match) {
         return match[0]
       }
     }
+
     return null
   }
 
