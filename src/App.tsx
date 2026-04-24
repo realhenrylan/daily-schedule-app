@@ -124,7 +124,7 @@ function App() {
         const start = dayjs(s.startDate)
         const end = dayjs(s.endDate)
         const eventStart = dayjs(event.start)
-        return eventStart.isAfter(start.subtract(1, 'day')) && eventStart.isBefore(end.add(1, 'day'))
+        return eventStart.isAfter(start.subtract(1, 'day') && eventStart.isBefore(end.add(1, 'day'))
       })
       return !!sem
     })
