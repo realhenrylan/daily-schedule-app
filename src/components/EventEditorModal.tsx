@@ -6,6 +6,7 @@ interface EventEditorModalProps {
   event: CourseEvent
   onClose: () => void
   onSave: (event: CourseEvent) => Promise<void>
+  onDelete: (eventId: string) => Promise<void>
 }
 
 const PRESET_COLORS = ['#4F46E5', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
@@ -15,12 +16,20 @@ function toLocalInputValue(iso: string): string {
   return d.format('YYYY-MM-DDTHH:mm')
 }
 
-export function EventEditorModal({ event, onClose, onSave }: EventEditorModalProps) {
+export function EventEditorModal({ event, onClose, onSave, onDelete }: EventEditorModalProps) {
   const [draft, setDraft] = useState<CourseEvent>(event)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     await onSave({ ...draft, updatedAt: new Date().toISOString() })
+    onClose()
+  }
+
+  async function handleDelete() {
+    if (!window.confirm('确认删除这条课程吗？该操作不可撤销。')) {
+      return
+    }
+    await onDelete(event.id)
     onClose()
   }
 
@@ -95,6 +104,9 @@ export function EventEditorModal({ event, onClose, onSave }: EventEditorModalPro
           </div>
 
           <div className="modal-actions">
+            <button type="button" className="danger" onClick={() => void handleDelete()}>
+              删除课程
+            </button>
             <button type="submit">保存</button>
           </div>
         </form>
