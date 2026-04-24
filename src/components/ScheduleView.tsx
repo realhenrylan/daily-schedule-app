@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import type { CourseEvent } from '../types'
-import { formatTimeRange, getWeekDays, isSameDate, sortByStart, startOfWeek } from '../lib/date'
+import { getWeekDays, isSameDate, sortByStart, startOfWeek } from '../lib/date'
 
 interface ScheduleViewProps {
   events: CourseEvent[]
