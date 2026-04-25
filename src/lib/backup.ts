@@ -1,6 +1,9 @@
 import { readFileAsText } from '../utils/file'
 import type { BackupPayload, CourseEvent, ImportRecord, Semester } from '../types'
 
+// 最大备份文件大小限制（5MB），防止恶意大文件导致浏览器崩溃
+const MAX_BACKUP_FILE_SIZE = 5 * 1024 * 1024
+
 export function exportBackupJson(events: CourseEvent[], records: ImportRecord[], semesters: Semester[] = [], activeSemesterId: string | null = null): void {
   const payload: BackupPayload = {
     version: 2,
@@ -37,6 +40,11 @@ function isImportRecordArray(value: unknown): value is ImportRecord[] {
 }
 
 export async function importBackupJson(file: File): Promise<{ events: CourseEvent[]; records: ImportRecord[] }> {
+  // 检查文件大小，防止 DoS 攻击
+  if (file.size > MAX_BACKUP_FILE_SIZE) {
+    throw new Error(`备份文件过大（${(file.size / 1024 / 1024).toFixed(2)}MB），最大支持 ${MAX_BACKUP_FILE_SIZE / 1024 / 1024}MB`)
+  }
+
   const text = await readFileAsText(file)
   const data = JSON.parse(text) as { version?: number; events?: unknown; records?: unknown }
 

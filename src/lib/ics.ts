@@ -2,9 +2,15 @@ import ICAL from 'ical.js'
 import dayjs from 'dayjs'
 import type { CourseEvent } from '../types'
 
+// 课程颜色调色板，提供6种颜色用于区分不同课程
 const DEFAULT_COLORS = ['#4F46E5', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
+// 重复事件最大展开次数，防止异常规则导致性能问题
 const MAX_OCCURRENCES = 500
 
+/**
+ * 根据课程标题生成颜色哈希
+ * 使用简单的字符串哈希算法确保同一标题总是生成相同颜色
+ */
 function colorFromTitle(title: string): string {
   let hash = 0
   for (let i = 0; i < title.length; i += 1) {
@@ -13,14 +19,25 @@ function colorFromTitle(title: string): string {
   return DEFAULT_COLORS[Math.abs(hash) % DEFAULT_COLORS.length]
 }
 
+/**
+ * 标准化日期为 ISO 格式字符串
+ */
 function normalizeDate(date: Date): string {
   return dayjs(date).toISOString()
 }
 
+/**
+ * 生成事件唯一标识符
+ * 优先使用 UID，备选使用标题+时间+随机UUID
+ */
 function eventId(uid: string | undefined, title: string, start: Date): string {
   return uid ? `${uid}-${dayjs(start).valueOf()}` : `${title}-${dayjs(start).valueOf()}-${crypto.randomUUID()}`
 }
 
+/**
+ * 将解析后的数据转换为 CourseEvent 对象
+ * 自动生成 ID、颜色和时间戳
+ */
 function toCourseEvent(input: {
   uid?: string
   title: string
@@ -46,6 +63,10 @@ function toCourseEvent(input: {
   }
 }
 
+/**
+ * 展开 ICS 文件中的多行内容
+ * ICS 文件规定超过 75 字符的内容需要折叠
+ */
 function unfoldIcs(content: string): string {
   const normalized = content.replace(/\r\n/g, '\n')
   const lines = normalized.split('\n')

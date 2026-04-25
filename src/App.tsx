@@ -222,6 +222,51 @@ function App() {
     eventsRef.current = events
   }, [events])
 
+  /**
+   * 从文件名中提取学期信息
+   * 支持中英文季节识别（春/夏/秋/冬）以及年份识别
+   * @param fileName - ICS 文件名
+   * @returns 学期名称（如 "2024春"）或 null
+   */
+  function extractSemesterFromFileName(fileName: string): string | null {
+    const lowerFileName = fileName.toLowerCase()
+
+    const yearMatch = lowerFileName.match(/(20\d{2})/g)
+    let year = ''
+    if (yearMatch && yearMatch.length > 0) {
+      year = yearMatch[0]
+    }
+
+    let season = ''
+    if (lowerFileName.includes('summer') || lowerFileName.includes('夏季')) {
+      season = '夏'
+    } else if (lowerFileName.includes('spring') || lowerFileName.includes('春季')) {
+      season = '春'
+    } else if (lowerFileName.includes('fall') || lowerFileName.includes('autumn') || lowerFileName.includes('秋季')) {
+      season = '秋'
+    } else if (lowerFileName.includes('winter') || lowerFileName.includes('冬季')) {
+      season = '冬'
+    }
+
+    if (year || season) {
+      return `${year}${season}`
+    }
+
+    const chinesePatterns = [
+      /(\d{4}[年-]?\d{1,2}[学期季]?)/,
+      /(\d{4}-\d{4}[学年]?)/,
+      /(秋|春|夏|冬)/,
+    ]
+    for (const pattern of chinesePatterns) {
+      const match = fileName.match(pattern)
+      if (match) {
+        return match[0]
+      }
+    }
+
+    return null
+  }
+
   async function handleConfirmImport(incoming: CourseEvent[], sourceName: string): Promise<void> {
     const deduped = incoming.filter((event) => !eventsByStartKey.has(`${event.uid || event.title}|${event.start}`))
 
@@ -281,45 +326,6 @@ function App() {
     setEvents(next)
     setRecords((prev) => [...prev, record])
     setActiveTab('schedule')
-  }
-
-function extractSemesterFromFileName(fileName: string): string | null {
-    const lowerFileName = fileName.toLowerCase()
-
-    const yearMatch = lowerFileName.match(/(20\d{2})/g)
-    let year = ''
-    if (yearMatch && yearMatch.length > 0) {
-      year = yearMatch[0]
-    }
-
-    let season = ''
-    if (lowerFileName.includes('summer') || lowerFileName.includes('夏季')) {
-      season = '夏'
-    } else if (lowerFileName.includes('spring') || lowerFileName.includes('春季')) {
-      season = '春'
-    } else if (lowerFileName.includes('fall') || lowerFileName.includes('autumn') || lowerFileName.includes('秋季')) {
-      season = '秋'
-    } else if (lowerFileName.includes('winter') || lowerFileName.includes('冬季')) {
-      season = '冬'
-    }
-
-    if (year || season) {
-      return `${year}${season}`
-    }
-
-    const chinesePatterns = [
-      /(\d{4}[年-]?\d{1,2}[学期季]?)/,
-      /(\d{4}-\d{4}[学年]?)/,
-      /(秋|春|夏|冬)/,
-    ]
-    for (const pattern of chinesePatterns) {
-      const match = fileName.match(pattern)
-      if (match) {
-        return match[0]
-      }
-    }
-
-    return null
   }
 
   async function handleClearAll() {
