@@ -574,13 +574,18 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 2px;
   color: var(--text);
   font-size: 16px;
   font-weight: 500;
   transition: all 200ms var(--ease);
   position: relative;
+  padding-top: 8px;
+}
+
+.day-cell span {
+  line-height: 1;
 }
 
 .day-cell:active {
