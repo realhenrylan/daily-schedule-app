@@ -4,8 +4,8 @@
   "description": "可导入 ICS 的课表日历网页应用",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8fafc",
-  "theme_color": "#4f46e5",
+  "background_color": "#fafafa",
+  "theme_color": "#0071e3",
   "icons": [
     {
       "src": "/favicon.svg",
