@@ -4,6 +4,14 @@
 
 ## [Unreleased] - 当前版本
 
+### ✨ 新增功能
+
+- **Favicon 图标设计**
+  - 设计并替换了简约的蓝色日历 favicon（SVG 格式）
+  - 图标采用 iOS 风格圆角方形 + 白色日历线条，匹配 App 整体设计语言
+  - 新增 `apple-touch-icon` 支持，添加到 iPhone 主屏幕时显示一致图标
+  - 同步更新 `theme-color` 为 `#0071e3`（与 App CSS 主题色一致）
+
 ### 🐛 Bug 修复
 
 - **日历日期数字对齐修复**

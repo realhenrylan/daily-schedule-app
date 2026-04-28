@@ -437,8 +437,9 @@ function App() {
       await disablePushForDevice(deviceId)
       setPushEnabled(false)
       setPushStatusText('推送已关闭')
-    } catch {
-      setPushStatusText('关闭推送失败')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '关闭推送失败'
+      setPushStatusText(`关闭失败：${message}`)
     }
   }
 

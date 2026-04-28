@@ -46,11 +46,18 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray
 }
 
+/**
+ * 确保 Service Worker 注册就绪，添加超时保护防止永久挂起
+ */
 async function ensureRegistration(): Promise<ServiceWorkerRegistration> {
   if (!('serviceWorker' in navigator)) {
     throw new Error('当前浏览器不支持 Service Worker')
   }
-  return navigator.serviceWorker.ready
+  // 添加 10 秒超时保护，防止 SW 异常时永久挂起
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Service Worker 注册超时')), 10000),
+  )
+  return Promise.race([navigator.serviceWorker.ready, timeout])
 }
 
 async function ensurePermission(): Promise<NotificationPermission> {
@@ -112,11 +119,15 @@ export async function disablePushForDevice(deviceId: string): Promise<void> {
     await subscription.unsubscribe()
   }
 
-  await fetch(UNSUBSCRIBE_ENDPOINT, {
+  const res = await fetch(UNSUBSCRIBE_ENDPOINT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ deviceId }),
   })
+
+  if (!res.ok) {
+    throw await readApiError(res, '取消订阅服务端失败')
+  }
 }
 
 export async function syncDeviceReminders(deviceId: string, events: ReminderEventInput[], leadMinutes: number): Promise<void> {

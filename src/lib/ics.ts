@@ -304,6 +304,15 @@ function parseFallback(content: string): CourseEvent[] {
   return parsed.sort((a, b) => dayjs(a.start).valueOf() - dayjs(b.start).valueOf())
 }
 
+/**
+ * 将 ICAL.Time 安全转换为本地 Date
+ * 不使用 toJSDate()，因为它对无时区的浮动时间会错误地用 Date.UTC 创建，
+ * 导致在 UTC+8 时区显示偏 8 小时
+ */
+function icalTimeToDate(time: ICAL.Time): Date {
+  return new Date(time.year, time.month - 1, time.day, time.hour, time.minute, time.second, 0)
+}
+
 function parseByIcalJs(content: string): CourseEvent[] {
   const prepared = unfoldIcs(content)
   const jcalData = ICAL.parse(prepared)
@@ -328,14 +337,14 @@ function parseByIcalJs(content: string): CourseEvent[] {
     const exdateMatchers = buildExdateMatchers(vevent)
 
     if (!event.isRecurring()) {
-      const start = startTime.toJSDate()
+      const start = icalTimeToDate(startTime)
       if (!isExcluded(start, exdateMatchers)) {
         parsed.push(
           toCourseEvent({
             uid,
             title,
             start,
-            end: endTime.toJSDate(),
+            end: icalTimeToDate(endTime),
             location,
             note,
             recurrenceRule,
@@ -346,7 +355,7 @@ function parseByIcalJs(content: string): CourseEvent[] {
     }
 
     const iterator = event.iterator()
-    const until = estimateRecurringUntil(startTime.toJSDate(), recurrenceRule)
+    const until = estimateRecurringUntil(icalTimeToDate(startTime), recurrenceRule)
     let occurrences = 0
 
     while (occurrences < MAX_OCCURRENCES) {
@@ -356,8 +365,8 @@ function parseByIcalJs(content: string): CourseEvent[] {
       }
 
       const details = event.getOccurrenceDetails(next)
-      const occurrenceStart = details.startDate.toJSDate()
-      const occurrenceEnd = details.endDate.toJSDate()
+      const occurrenceStart = icalTimeToDate(details.startDate)
+      const occurrenceEnd = icalTimeToDate(details.endDate)
 
       if (dayjs(occurrenceStart).isAfter(until)) {
         break
