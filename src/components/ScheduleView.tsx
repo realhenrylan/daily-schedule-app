@@ -64,16 +64,12 @@ export function ScheduleView({ events, onEditEvent }: ScheduleViewProps) {
   function goToPrevEventWeek() {
     if (prevEventWeekTs !== null) {
       setWeekCursor(dayjs(prevEventWeekTs))
-    } else if (weekTsList.length > 0) {
-      setWeekCursor(dayjs(weekTsList[weekTsList.length - 1]))
     }
   }
 
   function goToNextEventWeek() {
     if (nextEventWeekTs !== null) {
       setWeekCursor(dayjs(nextEventWeekTs))
-    } else if (weekTsList.length > 0) {
-      setWeekCursor(dayjs(weekTsList[0]))
     }
   }
 

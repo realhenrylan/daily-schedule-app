@@ -279,20 +279,11 @@ function App() {
     let semesterStart: string | undefined
     let semesterEnd: string | undefined
     if (semesterName) {
-      const allCourseDates = [...events, ...deduped]
-        .filter(() => extractSemesterFromFileName(sourceName) === semesterName)
-        .map((evt) => dayjs(evt.start))
-        .filter((d) => d.isValid())
-
-      if (allCourseDates.length > 0) {
-        semesterStart = allCourseDates.reduce((min, d) => d.isBefore(min) ? d : min).startOf('day').toISOString()
-        semesterEnd = allCourseDates.reduce((max, d) => d.isAfter(max) ? d : max).endOf('day').toISOString()
-      } else {
-        const newDates = deduped.map((evt) => dayjs(evt.start)).filter((d) => d.isValid())
-        if (newDates.length > 0) {
-          semesterStart = newDates.reduce((min, d) => d.isBefore(min) ? d : min).startOf('day').toISOString()
-          semesterEnd = newDates.reduce((max, d) => d.isAfter(max) ? d : max).endOf('day').add(4, 'month').toISOString()
-        }
+      // 根据新导入事件的日期范围确定学期起止时间
+      const newDates = deduped.map((evt) => dayjs(evt.start)).filter((d) => d.isValid())
+      if (newDates.length > 0) {
+        semesterStart = newDates.reduce((min, d) => d.isBefore(min) ? d : min).startOf('day').toISOString()
+        semesterEnd = newDates.reduce((max, d) => d.isAfter(max) ? d : max).endOf('day').add(4, 'month').toISOString()
       }
 
       if (semesterStart && semesterEnd) {
@@ -347,11 +338,12 @@ function App() {
   }
 
   async function handleToggleFavorite(eventId: string) {
-    const event = events.find((e) => e.id === eventId)
+    const event = eventsRef.current.find((e) => e.id === eventId)
     if (!event) return
     const updated = { ...event, isFavorite: !event.isFavorite, updatedAt: new Date().toISOString() }
-    await replaceEvents(events.map((e) => (e.id === eventId ? updated : e)))
-    setEvents((prev) => sortByStart(prev.map((e) => (e.id === eventId ? updated : e))))
+    const nextEvents = sortByStart(eventsRef.current.map((e) => (e.id === eventId ? updated : e)))
+    await replaceEvents(nextEvents)
+    setEvents(nextEvents)
   }
 
   function handleQuickAdd() {
@@ -368,7 +360,7 @@ function App() {
   }
 
   async function handleSaveEditedEvent(updated: CourseEvent) {
-    const nextEvents = sortByStart(events.map((item) => (item.id === updated.id ? updated : item)))
+    const nextEvents = sortByStart(eventsRef.current.map((item) => (item.id === updated.id ? updated : item)))
     await replaceEvents(nextEvents)
     setEvents(nextEvents)
   }
@@ -496,29 +488,31 @@ function App() {
       <TabNav activeTab={activeTab} onChange={handleTabChange} tabs={navTabs} />
 
       <main className="content" data-transition-direction={transitionDirection}>
-        <section className="filter-bar view-stage" aria-label="搜索与筛选">
-          <div className="filter-row">
-            <input
-              value={searchText}
-              onChange={(event) => setSearchText(event.target.value)}
-              placeholder="搜索课程..."
-            />
-            <button type="button" onClick={() => { setSearchText(''); setFilterDate('') }}>
-              清除
-            </button>
-          </div>
-          <div className="filter-row">
-            <input
-              type="date"
-              value={filterDate}
-              onChange={(event) => setFilterDate(event.target.value)}
-              style={{ flex: 'none', width: '160px' }}
-            />
-            <small style={{ lineHeight: '40px' }}>
-              {filteredEvents.length} 条
-            </small>
-          </div>
-        </section>
+        {['home', 'schedule', 'calendar'].includes(activeTab) ? (
+          <section className="filter-bar view-stage" aria-label="搜索与筛选">
+            <div className="filter-row">
+              <input
+                value={searchText}
+                onChange={(event) => setSearchText(event.target.value)}
+                placeholder="搜索课程..."
+              />
+              <button type="button" onClick={() => { setSearchText(''); setFilterDate('') }}>
+                清除
+              </button>
+            </div>
+            <div className="filter-row">
+              <input
+                type="date"
+                value={filterDate}
+                onChange={(event) => setFilterDate(event.target.value)}
+                style={{ flex: 'none', width: '160px' }}
+              />
+              <small style={{ lineHeight: '40px' }}>
+                {filteredEvents.length} 条
+              </small>
+            </div>
+          </section>
+        ) : null}
 
         {isLoading ? <section className="panel view-stage">加载中...</section> : null}
         {!isLoading && activeTab === 'home' ? <div className="view-stage"><HomeView events={filteredEvents} conflictEvents={conflictEvents} onToggleFavorite={handleToggleFavorite} onAddEvent={handleQuickAdd} /></div> : null}

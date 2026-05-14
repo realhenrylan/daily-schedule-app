@@ -4,6 +4,30 @@
 
 ## [Unreleased] - 当前版本
 
+### 🐛 Bug 修复
+
+- **修复闭包数据竞争问题（高优先级）**
+  - 修复了 `handleToggleFavorite` 和 `handleSaveEditedEvent` 中使用闭包变量 `events` 而非 `eventsRef.current` 的问题
+  - 在快速连续操作时（如快速收藏/编辑多个课程），后一次操作可能因闭包未更新而过时，导致 `replaceEvents` 覆盖前一次的 IDB 写入
+  - 使用 `eventsRef.current`（通过 `useEffect` 实时同步）确保始终操作最新数据
+
+- **修复有课周导航边界回绕行为**
+  - 修复了在第一个/最后一个有课周时点击"上一有课周"/"下一有课周"会意外回绕到最后/第一周的问题
+  - 改为在边界处不执行任何操作，符合用户直觉
+
+### ♻️ 代码优化
+
+- **移除学期计算中的无效过滤（死代码）**
+  - 移除了 `handleConfirmImport` 中 `.filter(() => extractSemesterFromFileName(sourceName) === semesterName)` 的死代码
+  - 该 filter 未使用 event 参数且检查恒为 true，已无意义
+  - 简化学期日期范围计算，仅使用新导入事件（`deduped`）确定学期起止时间
+
+### 🎨 UI 改进
+
+- **过滤栏仅在有筛选需求的页面显示**
+  - 搜索/筛选栏现在仅在首页、课表、日历页面显示
+  - 在导入、设置、运维页面不再显示无意义的过滤输入框
+
 ### ✨ 新增功能
 
 - **Favicon 图标设计**
