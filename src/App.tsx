@@ -74,6 +74,8 @@ function App() {
   )
   const deleteTimerRef = useRef<number | null>(null)
   const eventsRef = useRef<CourseEvent[]>([])
+  const pushEnabledRef = useRef(pushEnabled)
+  useEffect(() => { pushEnabledRef.current = pushEnabled }, [pushEnabled])
   const [theme, setTheme] = useState<ThemeMode>(() => {
     const saved = localStorage.getItem('schedule-theme')
     if (saved === 'light' || saved === 'dark') {
@@ -317,12 +319,20 @@ function App() {
     setEvents(next)
     setRecords((prev) => [...prev, record])
     setActiveTab('schedule')
+    void trySyncReminders()
   }
 
   async function handleClearAll() {
     await Promise.all([clearEvents(), clearImportRecords()])
     setEvents([])
     setRecords([])
+    // 同步空事件列表到后端，清除该设备所有未发送的提醒
+    if (pushEnabledRef.current) {
+      try {
+        const deviceId = getOrCreateDeviceId()
+        await syncDeviceReminders(deviceId, [], reminderMinutes)
+      } catch { /* silent */ }
+    }
   }
 
   function handleExportBackup() {
@@ -335,6 +345,7 @@ function App() {
     setEvents(sortByStart(restored.events))
     setRecords(restored.records)
     setActiveTab('schedule')
+    void trySyncReminders()
   }
 
   async function handleToggleFavorite(eventId: string) {
@@ -363,6 +374,7 @@ function App() {
     const nextEvents = sortByStart(eventsRef.current.map((item) => (item.id === updated.id ? updated : item)))
     await replaceEvents(nextEvents)
     setEvents(nextEvents)
+    void trySyncReminders()
   }
 
   async function handleDeleteEvent(eventId: string) {
@@ -382,6 +394,7 @@ function App() {
 
     deleteTimerRef.current = window.setTimeout(() => {
       void replaceEvents(nextEvents)
+      void trySyncReminders()
       setPendingDelete(null)
       deleteTimerRef.current = null
     }, 5000)
@@ -400,7 +413,25 @@ function App() {
     const restored = sortByStart([...eventsRef.current, pendingDelete.event])
     setEvents(restored)
     await replaceEvents(restored)
+    void trySyncReminders()
     setPendingDelete(null)
+  }
+
+  /** 推送已开启时自动同步当前所有事件的提醒到后端，静默失败不打断用户操作 */
+  async function trySyncReminders() {
+    if (!pushEnabledRef.current) return
+    try {
+      const deviceId = getOrCreateDeviceId()
+      const eventsWithReminder = eventsRef.current.map((event) => ({
+        id: event.id,
+        title: event.title,
+        start: event.start,
+        reminderMinutes: event.reminderMinutes ?? reminderMinutes,
+      }))
+      await syncDeviceReminders(deviceId, eventsWithReminder, reminderMinutes)
+    } catch {
+      // 静默失败，不干扰主操作流程
+    }
   }
 
   async function handleEnablePush() {

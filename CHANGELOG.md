@@ -6,6 +6,12 @@
 
 ### 🐛 Bug 修复
 
+- **修复推送通知系统的4个关键问题**
+  - **单课级别提醒设置不生效**：后端 `api/push/sync.ts` 忽略前端发送的 `reminderMinutes`，所有课程强制使用全局 `leadMinutes`。修复后端 `EventInput` 类型增加 `reminderMinutes` 字段，单课设置优先于全局默认值
+  - **课程 CRUD 后不同步提醒**：编辑时间/删除/新增课程后，后端提醒未更新，导致旧提醒超时或无提醒。新增 `trySyncReminders()` 自动同步机制，在保存编辑、确认导入、确认删除(含撤销)、备份还原后自动调用
+  - **清空数据不清理后端提醒**：`handleClearAll` 后后端残留旧 reminders，Cron 继续发送失败通知。清空时同步空事件列表到后端，清除该设备所有未发送提醒
+  - **备份还原不创建提醒**：`handleImportBackup` 后无推送提醒。增加 `trySyncReminders()` 调用
+
 - **修复闭包数据竞争问题（高优先级）**
   - 修复了 `handleToggleFavorite` 和 `handleSaveEditedEvent` 中使用闭包变量 `events` 而非 `eventsRef.current` 的问题
   - 在快速连续操作时（如快速收藏/编辑多个课程），后一次操作可能因闭包未更新而过时，导致 `replaceEvents` 覆盖前一次的 IDB 写入

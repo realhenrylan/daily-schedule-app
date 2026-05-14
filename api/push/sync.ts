@@ -7,6 +7,8 @@ type EventInput = {
   id: string
   title: string
   start: string
+  /** 单课级别的提醒提前分钟数，优先级高于全局 leadMinutes */
+  reminderMinutes?: number
 }
 
 type Body = {
@@ -35,7 +37,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const now = dayjs()
     const next: ReminderRecord[] = body.events
       .map((event) => {
-        const notifyAt = dayjs(event.start).subtract(leadMinutes, 'minute')
+        // 单课级别 reminderMinutes 优先，无则使用全局 leadMinutes
+        const effectiveLead = (event.reminderMinutes != null && Number.isFinite(event.reminderMinutes))
+          ? Math.max(1, Math.min(180, event.reminderMinutes))
+          : leadMinutes
+        const notifyAt = dayjs(event.start).subtract(effectiveLead, 'minute')
         if (!notifyAt.isValid() || notifyAt.isBefore(now)) {
           return null
         }
@@ -47,7 +53,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           title: event.title,
           start: event.start,
           notifyAt: notifyAt.toISOString(),
-          leadMinutes,
+          leadMinutes: effectiveLead,
           sent: false,
         } satisfies ReminderRecord
       })
